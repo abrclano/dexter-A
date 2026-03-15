@@ -37,21 +37,6 @@ export interface RegisteredTool {
 export function getToolRegistry(model: string): RegisteredTool[] {
   const tools: RegisteredTool[] = [
     {
-      name: 'financial_search',
-      tool: createFinancialSearch(model),
-      description: FINANCIAL_SEARCH_DESCRIPTION,
-    },
-    {
-      name: 'financial_metrics',
-      tool: createFinancialMetrics(model),
-      description: FINANCIAL_METRICS_DESCRIPTION,
-    },
-    {
-      name: 'read_filings',
-      tool: createReadFilings(model),
-      description: READ_FILINGS_DESCRIPTION,
-    },
-    {
       name: 'web_fetch',
       tool: webFetchTool,
       description: WEB_FETCH_DESCRIPTION,
@@ -97,6 +82,27 @@ export function getToolRegistry(model: string): RegisteredTool[] {
       description: MEMORY_UPDATE_DESCRIPTION,
     },
   ];
+
+  // Include Financial Datasets tools only if FINANCIAL_DATASETS_API_KEY is configured
+  if (process.env.FINANCIAL_DATASETS_API_KEY) {
+    tools.push(
+      {
+        name: 'financial_search',
+        tool: createFinancialSearch(model),
+        description: FINANCIAL_SEARCH_DESCRIPTION,
+      },
+      {
+        name: 'financial_metrics',
+        tool: createFinancialMetrics(model),
+        description: FINANCIAL_METRICS_DESCRIPTION,
+      },
+      {
+        name: 'read_filings',
+        tool: createReadFilings(model),
+        description: READ_FILINGS_DESCRIPTION,
+      },
+    );
+  }
 
   // Include cn_market_search if TUSHARE_API_KEY is configured
   if (process.env.TUSHARE_API_KEY) {
