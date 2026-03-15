@@ -1,5 +1,5 @@
 /**
- * Fundamental tools: get_cn_income, get_cn_balance, get_cn_cashflow, get_cn_indicators
+ * Fundamental tools: get_cn_income, get_cn_balance, get_cn_cashflow, get_cn_indicators, get_cn_forecast
  *
  * Generated via ToolFactory from TOOL_CONFIGS.
  */
@@ -23,12 +23,18 @@ function createApiClient(): TushareApiClientImpl {
 
 const factory = new ToolFactory(createApiClient());
 
-const FUNDAMENTAL_NAMES = ['get_cn_income', 'get_cn_balance', 'get_cn_cashflow', 'get_cn_indicators'];
+const FUNDAMENTAL_NAMES = [
+  'get_cn_income',
+  'get_cn_balance',
+  'get_cn_cashflow',
+  'get_cn_indicators',
+  'get_cn_forecast',
+];
 
 const tools = factory.createTools(
   TOOL_CONFIGS.filter((c) => FUNDAMENTAL_NAMES.includes(c.name))
-) as [DynamicStructuredTool, DynamicStructuredTool, DynamicStructuredTool, DynamicStructuredTool];
+) as [DynamicStructuredTool, DynamicStructuredTool, DynamicStructuredTool, DynamicStructuredTool, DynamicStructuredTool];
 
-const [getCnIncome, getCnBalance, getCnCashflow, getCnIndicators] = tools;
+const [getCnIncome, getCnBalance, getCnCashflow, getCnIndicators, getCnForecast] = tools;
 
-export { getCnIncome, getCnBalance, getCnCashflow, getCnIndicators };
+export { getCnIncome, getCnBalance, getCnCashflow, getCnIndicators, getCnForecast };

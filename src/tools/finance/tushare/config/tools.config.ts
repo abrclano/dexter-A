@@ -690,6 +690,61 @@ Returns: Array of price records with fields: ts_code, trade_date, freq, open, hi
   },
 
   // ============================================================================
+  // Disclosure / Event-Driven Tools
+  // ============================================================================
+
+  {
+    name: 'get_cn_forecast',
+    description: `Fetches earnings forecast (业绩预告) announcements for Chinese A-share companies.
+
+When to Use:
+- Query a stock's historical earnings forecasts (beat/miss/turnaround/first-loss/continued-loss/continued-profit/slight-increase/slight-decrease)
+- Get forecasts by announcement date or reporting period
+- Analyze expected net profit change ranges and stated reasons
+
+When NOT to Use:
+- For actual financial statement data (use get_cn_income, get_cn_balance, etc.)
+- For all companies in a given quarter (requires forecast_vip; this endpoint supports single stock or announcement-date queries only)
+
+Example:
+- ts_code: "000005.SZ"
+- ann_date: "20190131" (announcement date; use either ts_code or ann_date)
+- period: "20181231" (report period end date, e.g. annual/semi-annual/quarterly)
+- type: "预增" (optional, filter by forecast type)
+
+Returns: Earnings forecast records with fields: ts_code, ann_date, end_date, type, p_change_min, p_change_max, net_profit_min, net_profit_max, last_parent_net, first_ann_date, summary, change_reason`,
+    apiName: 'forecast',
+    fields: [
+      'ts_code',
+      'ann_date',
+      'end_date',
+      'type',
+      'p_change_min',
+      'p_change_max',
+      'net_profit_min',
+      'net_profit_max',
+      'last_parent_net',
+      'first_ann_date',
+      'summary',
+      'change_reason',
+    ],
+    cacheStrategy: CacheStrategy.FINANCIAL,
+    validate: (input: any) => {
+      // ts_code and ann_date are mutually exclusive query axes
+      if (input.ts_code) validateStockCode(input.ts_code);
+      if (input.ann_date) validateDate(input.ann_date);
+      if (input.start_date) validateDate(input.start_date);
+      if (input.end_date) validateDate(input.end_date);
+      if (input.period) validateDate(input.period);
+    },
+    parameterNames: {
+      stockCode: 'ts_code',
+      startDate: 'start_date',
+      endDate: 'end_date',
+    },
+  },
+
+  // ============================================================================
   // Reference Data Tools
   // ============================================================================
 

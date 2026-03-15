@@ -151,6 +151,19 @@ export const stkWeekMonthAdjFixture: TushareRawResponse = loadRaw(
   )
 );
 
+// ── Disclosure / Event-Driven fixtures ───────────────────────────────────────
+
+export const forecastFixture: TushareRawResponse = loadRaw(
+  'forecast.json',
+  makeStub(
+    ['ts_code', 'ann_date', 'end_date', 'type', 'p_change_min', 'p_change_max', 'net_profit_min', 'net_profit_max', 'last_parent_net', 'first_ann_date', 'summary', 'change_reason'],
+    [
+      ['000005.SZ', '20190131', '20181231', '预增', 618.56, 945.18, 5000.0, 8000.0, 736.5, '20190131', '预计2018年净利润同比增长618.56%至945.18%', '主营业务收入增长'],
+      ['000825.SZ', '20190131', '20181231', '略增', 3.85, 12.51, 12000.0, 13000.0, 11500.0, '20190131', '预计2018年净利润同比略增', '成本控制改善'],
+    ]
+  )
+);
+
 // ── Reference data fixtures ───────────────────────────────────────────────────
 
 export const stockBasicFixture: TushareRawResponse = loadRaw(

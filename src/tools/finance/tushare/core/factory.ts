@@ -129,6 +129,22 @@ export function generateSchema(config: ToolConfig): z.ZodObject<z.ZodRawShape> {
     });
   }
 
+  const isForecast = apiName === 'forecast';
+
+  if (isForecast) {
+    return z.object({
+      ts_code: z.string().optional().describe(PARAM_DESCRIPTIONS['ts_code']!),
+      ann_date: z.string().optional().describe(PARAM_DESCRIPTIONS['ann_date'] ?? 'Announcement date in YYYYMMDD format, e.g. "20190131".'),
+      start_date: z.string().optional().describe(PARAM_DESCRIPTIONS['start_date']!),
+      end_date: z.string().optional().describe(PARAM_DESCRIPTIONS['end_date']!),
+      period: z.string().optional().describe(PARAM_DESCRIPTIONS['period']!),
+      type: z
+        .enum(['预增', '预减', '扭亏', '首亏', '续亏', '续盈', '略增', '略减'])
+        .optional()
+        .describe('业绩预告类型'),
+    });
+  }
+
   if (isReferenceData) {
     if (apiName === 'stock_basic') {
       return z.object({

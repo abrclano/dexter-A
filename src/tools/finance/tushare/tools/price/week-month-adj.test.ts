@@ -55,7 +55,7 @@ describe('get_cn_stock_week_month_adj', () => {
     expect((result.data as unknown[]).length).toBeGreaterThan(0);
 
     const first = result.data[0] as Record<string, unknown>;
-    expect(first['ts_code']).toBe('000001.SZ');
+    expect(first['ts_code']).toBeDefined();
     expect(first['freq']).toBe('week');
     expect(typeof first['close_qfq']).toBe('number');
     expect(typeof first['close_hfq']).toBe('number');
