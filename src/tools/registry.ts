@@ -13,6 +13,7 @@ import { READ_FILINGS_DESCRIPTION } from './finance/read-filings.js';
 import { heartbeatTool, HEARTBEAT_TOOL_DESCRIPTION } from './heartbeat/heartbeat-tool.js';
 import { memoryGetTool, MEMORY_GET_DESCRIPTION, memorySearchTool, MEMORY_SEARCH_DESCRIPTION, memoryUpdateTool, MEMORY_UPDATE_DESCRIPTION } from './memory/index.js';
 import { discoverSkills } from '../skills/index.js';
+import { createCnMarketSearch, CN_MARKET_SEARCH_DESCRIPTION } from './finance/tushare/index.js';
 
 /**
  * A registered tool with its rich description for system prompt injection.
