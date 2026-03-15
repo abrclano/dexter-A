@@ -153,6 +153,42 @@ export const stkWeekMonthAdjFixture: TushareRawResponse = loadRaw(
 
 // ── Disclosure / Event-Driven fixtures ───────────────────────────────────────
 
+export const expressFixture: TushareRawResponse = loadRaw(
+  'express.json',
+  makeStub(
+    [
+      'ts_code', 'ann_date', 'end_date',
+      'revenue', 'operate_profit', 'total_profit', 'n_income', 'total_assets',
+      'total_hldr_eqy_exc_min_int', 'diluted_eps', 'diluted_roe',
+      'yoy_net_profit', 'bps', 'yoy_sales', 'yoy_op', 'yoy_tp',
+      'yoy_dedu_np', 'yoy_eps', 'yoy_roe', 'growth_assets', 'yoy_equity',
+      'growth_bps', 'or_last_year', 'op_last_year', 'tp_last_year',
+      'np_last_year', 'eps_last_year', 'open_net_assets', 'open_bps',
+      'perf_summary', 'is_audit', 'remark',
+    ],
+    [
+      [
+        '603535.SH', '20180411', '20180331',
+        2.064659e+08, 3.345047e+07, 3.340047e+07, 2.672643e+07, 1.682111e+09,
+        9.5e+08, 0.21, 2.81,
+        15.2, 7.52, 18.3, 22.1, 21.8,
+        14.9, 18.5, 0.3, 5.2, 4.8,
+        3.1, 1.742e+08, 2.737e+07, 2.737e+07, 2.319e+07, 0.18, 9.2e+08, 7.31,
+        '营业收入和净利润同比增长', 0, null,
+      ],
+      [
+        '603535.SH', '20180208', '20171231',
+        1.034262e+09, 1.323373e+08, 1.440493e+08, 1.188325e+08, 1.710466e+09,
+        9.8e+08, 0.94, 12.13,
+        20.5, 7.48, 25.3, 28.7, 27.9,
+        19.8, 22.1, 1.1, 8.3, 7.9,
+        4.2, 8.6e+08, 1.055e+08, 1.148e+08, 9.86e+07, 0.78, 8.9e+08, 7.05,
+        '全年业绩稳健增长', 1, null,
+      ],
+    ]
+  )
+);
+
 export const forecastFixture: TushareRawResponse = loadRaw(
   'forecast.json',
   makeStub(

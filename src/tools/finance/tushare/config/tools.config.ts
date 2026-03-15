@@ -744,6 +744,78 @@ Returns: Earnings forecast records with fields: ts_code, ann_date, end_date, typ
     },
   },
 
+  {
+    name: 'get_cn_express',
+    description: `Fetches earnings express reports (业绩快报) for Chinese A-share companies.
+
+When to Use:
+- Get preliminary financial results before the full report is published
+- Check key metrics like revenue, net profit, total assets, and EPS from quick disclosures
+- Analyze YoY growth rates for revenue, operating profit, and net profit
+- Compare ROE and BPS changes vs prior year
+
+When NOT to Use:
+- For full audited financial statements (use get_cn_income, get_cn_balance instead)
+- For earnings forecasts/guidance (use get_cn_forecast instead)
+- For all companies in a quarter (requires express_vip; this endpoint supports single stock queries only)
+
+Example:
+- ts_code: "600000.SH"
+- start_date: "20180101"
+- end_date: "20180701"
+- period: "20171231" (report period end date, e.g. annual/semi-annual/quarterly)
+
+Returns: Earnings express records with fields: ts_code, ann_date, end_date, revenue, operate_profit, total_profit, n_income, total_assets, total_hldr_eqy_exc_min_int, diluted_eps, diluted_roe, yoy_net_profit, bps, yoy_sales, yoy_op, yoy_tp, yoy_dedu_np, yoy_eps, yoy_roe, growth_assets, yoy_equity, growth_bps, or_last_year, op_last_year, tp_last_year, np_last_year, eps_last_year, open_net_assets, open_bps, perf_summary, is_audit, remark`,
+    apiName: 'express',
+    fields: [
+      'ts_code',
+      'ann_date',
+      'end_date',
+      'revenue',
+      'operate_profit',
+      'total_profit',
+      'n_income',
+      'total_assets',
+      'total_hldr_eqy_exc_min_int',
+      'diluted_eps',
+      'diluted_roe',
+      'yoy_net_profit',
+      'bps',
+      'yoy_sales',
+      'yoy_op',
+      'yoy_tp',
+      'yoy_dedu_np',
+      'yoy_eps',
+      'yoy_roe',
+      'growth_assets',
+      'yoy_equity',
+      'growth_bps',
+      'or_last_year',
+      'op_last_year',
+      'tp_last_year',
+      'np_last_year',
+      'eps_last_year',
+      'open_net_assets',
+      'open_bps',
+      'perf_summary',
+      'is_audit',
+      'remark',
+    ],
+    cacheStrategy: CacheStrategy.FINANCIAL,
+    validate: (input: any) => {
+      validateStockCode(input.ts_code);
+      if (input.ann_date) validateDate(input.ann_date);
+      if (input.start_date) validateDate(input.start_date);
+      if (input.end_date) validateDate(input.end_date);
+      if (input.period) validateDate(input.period);
+    },
+    parameterNames: {
+      stockCode: 'ts_code',
+      startDate: 'start_date',
+      endDate: 'end_date',
+    },
+  },
+
   // ============================================================================
   // Reference Data Tools
   // ============================================================================

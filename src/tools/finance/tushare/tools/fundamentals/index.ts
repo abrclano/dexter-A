@@ -29,12 +29,13 @@ const FUNDAMENTAL_NAMES = [
   'get_cn_cashflow',
   'get_cn_indicators',
   'get_cn_forecast',
+  'get_cn_express',
 ];
 
 const tools = factory.createTools(
   TOOL_CONFIGS.filter((c) => FUNDAMENTAL_NAMES.includes(c.name))
-) as [DynamicStructuredTool, DynamicStructuredTool, DynamicStructuredTool, DynamicStructuredTool, DynamicStructuredTool];
+) as [DynamicStructuredTool, DynamicStructuredTool, DynamicStructuredTool, DynamicStructuredTool, DynamicStructuredTool, DynamicStructuredTool];
 
-const [getCnIncome, getCnBalance, getCnCashflow, getCnIndicators, getCnForecast] = tools;
+const [getCnIncome, getCnBalance, getCnCashflow, getCnIndicators, getCnForecast, getCnExpress] = tools;
 
-export { getCnIncome, getCnBalance, getCnCashflow, getCnIndicators, getCnForecast };
+export { getCnIncome, getCnBalance, getCnCashflow, getCnIndicators, getCnForecast, getCnExpress };

@@ -12,7 +12,7 @@ export { getCnStockPrice, getCnStockPrices } from './tools/price/daily.js';
 export { getCnStockBasic } from './tools/price/basic.js';
 
 // Fundamental tools
-export { getCnIncome, getCnBalance, getCnCashflow, getCnIndicators, getCnForecast } from './tools/fundamentals/index.js';
+export { getCnIncome, getCnBalance, getCnCashflow, getCnIndicators, getCnForecast, getCnExpress } from './tools/fundamentals/index.js';
 
 // Market data tools
 export {

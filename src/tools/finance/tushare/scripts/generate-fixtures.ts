@@ -176,6 +176,22 @@ const fixtures: Array<{
         'vol', 'amount', 'change', 'pct_chg',
       ],
     },
+    // Earnings express report
+    {
+      filename: 'express.json',
+      apiName: 'express',
+      params: { ts_code: '603535.SH', start_date: '20180101', end_date: '20181231' },
+      fields: [
+        'ts_code', 'ann_date', 'end_date',
+        'revenue', 'operate_profit', 'total_profit', 'n_income', 'total_assets',
+        'total_hldr_eqy_exc_min_int', 'diluted_eps', 'diluted_roe',
+        'yoy_net_profit', 'bps', 'yoy_sales', 'yoy_op', 'yoy_tp',
+        'yoy_dedu_np', 'yoy_eps', 'yoy_roe', 'growth_assets', 'yoy_equity',
+        'growth_bps', 'or_last_year', 'op_last_year', 'tp_last_year',
+        'np_last_year', 'eps_last_year', 'open_net_assets', 'open_bps',
+        'perf_summary', 'is_audit', 'remark',
+      ],
+    },
     // Earnings forecast
     {
       filename: 'forecast.json',

@@ -129,6 +129,18 @@ export function generateSchema(config: ToolConfig): z.ZodObject<z.ZodRawShape> {
     });
   }
 
+  const isExpress = apiName === 'express';
+
+  if (isExpress) {
+    return z.object({
+      ts_code: z.string().describe(PARAM_DESCRIPTIONS['ts_code']!),
+      ann_date: z.string().optional().describe(PARAM_DESCRIPTIONS['ann_date'] ?? 'Announcement date in YYYYMMDD format.'),
+      start_date: z.string().optional().describe(PARAM_DESCRIPTIONS['start_date']!),
+      end_date: z.string().optional().describe(PARAM_DESCRIPTIONS['end_date']!),
+      period: z.string().optional().describe(PARAM_DESCRIPTIONS['period']!),
+    });
+  }
+
   const isForecast = apiName === 'forecast';
 
   if (isForecast) {
