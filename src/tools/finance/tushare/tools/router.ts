@@ -27,7 +27,7 @@ import { formatToolResult } from '../../../types.js';
 import { getCurrentDate } from '../../../../agent/prompts.js';
 import { MetricsTrackerImpl } from '../core/metrics.js';
 
-import { getCnStockPrice, getCnStockPrices } from './price/daily.js';
+import { getCnStockPrice, getCnStockPrices, getCnStockWeekMonthAdj } from './price/daily.js';
 import { getCnStockBasic } from './price/basic.js';
 import { getCnIncome, getCnBalance, getCnCashflow, getCnIndicators } from './fundamentals/index.js';
 import {
@@ -46,6 +46,7 @@ import { getCnStockList, getCnTradeCalendar } from './reference/index.js';
 const ALL_TOOLS: StructuredToolInterface[] = [
   getCnStockPrice,
   getCnStockPrices,
+  getCnStockWeekMonthAdj,
   getCnStockBasic,
   getCnIncome,
   getCnBalance,
@@ -84,6 +85,11 @@ const TOOL_SUMMARIES: ToolSummary[] = [
     name: 'get_cn_stock_prices',
     category: 'price',
     summary: 'Get historical daily OHLCV prices for an A-share stock over a date range.',
+  },
+  {
+    name: 'get_cn_stock_week_month_adj',
+    category: 'price',
+    summary: 'Get weekly or monthly adjusted (前复权/后复权) OHLCV prices for an A-share stock.',
   },
   {
     name: 'get_cn_stock_basic',
@@ -197,6 +203,7 @@ ${TOOL_SUMMARY_INDEX}
 ### Tool Selection
 - Current price → get_cn_stock_price
 - Historical prices → get_cn_stock_prices
+- 周线/月线/复权行情 → get_cn_stock_week_month_adj
 - PE/PB/市值/换手率 → get_cn_stock_basic
 - 营收/净利润/利润表 → get_cn_income
 - 资产/负债/资产负债表 → get_cn_balance

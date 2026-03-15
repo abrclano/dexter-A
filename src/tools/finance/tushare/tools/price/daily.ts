@@ -25,12 +25,13 @@ function createApiClient(): TushareApiClientImpl {
 const factory = new ToolFactory(createApiClient());
 
 const priceConfigs = TOOL_CONFIGS.filter((c) =>
-  ['get_cn_stock_price', 'get_cn_stock_prices'].includes(c.name)
+  ['get_cn_stock_price', 'get_cn_stock_prices', 'get_cn_stock_week_month_adj'].includes(c.name)
 );
 
-const [getCnStockPrice, getCnStockPrices] = factory.createTools(priceConfigs) as [
+const [getCnStockPrice, getCnStockPrices, getCnStockWeekMonthAdj] = factory.createTools(priceConfigs) as [
+  DynamicStructuredTool,
   DynamicStructuredTool,
   DynamicStructuredTool,
 ];
 
-export { getCnStockPrice, getCnStockPrices };
+export { getCnStockPrice, getCnStockPrices, getCnStockWeekMonthAdj };

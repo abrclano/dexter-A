@@ -128,6 +128,29 @@ export const limitListFixture: TushareRawResponse = loadRaw(
   )
 );
 
+// ── Weekly/Monthly adjusted price fixtures ────────────────────────────────────
+
+export const stkWeekMonthAdjFixture: TushareRawResponse = loadRaw(
+  'stk_week_month_adj.json',
+  makeStub(
+    [
+      'ts_code', 'trade_date', 'freq',
+      'open', 'high', 'low', 'close', 'pre_close',
+      'open_qfq', 'high_qfq', 'low_qfq', 'close_qfq',
+      'open_hfq', 'high_hfq', 'low_hfq', 'close_hfq',
+      'vol', 'amount', 'change', 'pct_chg',
+    ],
+    [
+      ['000001.SZ', '20250117', 'week', 11.25, 11.59, 11.08, 11.45, 11.30,
+        11.25, 11.59, 11.08, 11.45, 1437.57, 1481.02, 1415.85, 1463.13,
+        4353954.80, 4963695.53, 0.15, 0.01],
+      ['000001.SZ', '20250110', 'week', 11.38, 11.63, 11.22, 11.30, 11.38,
+        11.38, 11.63, 11.22, 11.30, 1454.18, 1486.13, 1433.74, 1443.96,
+        4445402.00, 5079074.95, -0.08, -0.01],
+    ]
+  )
+);
+
 // ── Reference data fixtures ───────────────────────────────────────────────────
 
 export const stockBasicFixture: TushareRawResponse = loadRaw(

@@ -628,6 +628,68 @@ Returns: Limit list with fields: trade_date, ts_code, name, close, pct_chg, amou
   },
 
   // ============================================================================
+  // Weekly / Monthly Adjusted Price Tools
+  // ============================================================================
+
+  {
+    name: 'get_cn_stock_week_month_adj',
+    description: `Fetches weekly or monthly OHLCV price data (with forward/backward adjusted prices) for a Chinese A-share stock.
+
+When to Use:
+- Analyze medium-to-long term price trends using weekly or monthly bars
+- Compare adjusted (复权) vs unadjusted prices over time
+- Calculate weekly/monthly returns and volatility
+- Build swing-trading or position-trading indicators
+
+When NOT to Use:
+- For daily price data (use get_cn_stock_price or get_cn_stock_prices instead)
+- For intraday data (not available in Tushare)
+- For valuation metrics like PE/PB (use get_cn_stock_basic instead)
+
+Example:
+- ts_code: "000001.SZ" (Ping An Bank)
+- freq: "week" (required: "week" for weekly, "month" for monthly)
+- start_date: "20240101"
+- end_date: "20241231"
+
+Returns: Array of price records with fields: ts_code, trade_date, freq, open, high, low, close, pre_close, open_qfq, high_qfq, low_qfq, close_qfq, open_hfq, high_hfq, low_hfq, close_hfq, vol, amount, change, pct_chg`,
+    apiName: 'stk_week_month_adj',
+    fields: [
+      'ts_code',
+      'trade_date',
+      'freq',
+      'open',
+      'high',
+      'low',
+      'close',
+      'pre_close',
+      'open_qfq',
+      'high_qfq',
+      'low_qfq',
+      'close_qfq',
+      'open_hfq',
+      'high_hfq',
+      'low_hfq',
+      'close_hfq',
+      'vol',
+      'amount',
+      'change',
+      'pct_chg',
+    ],
+    cacheStrategy: CacheStrategy.HISTORICAL,
+    validate: (input: any) => {
+      if (input.ts_code) validateStockCode(input.ts_code);
+      if (input.trade_date) validateDate(input.trade_date);
+      if (input.start_date && input.end_date) validateDateRange(input.start_date, input.end_date);
+    },
+    parameterNames: {
+      stockCode: 'ts_code',
+      startDate: 'start_date',
+      endDate: 'end_date',
+    },
+  },
+
+  // ============================================================================
   // Reference Data Tools
   // ============================================================================
 

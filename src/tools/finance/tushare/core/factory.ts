@@ -53,6 +53,7 @@ export function generateSchema(config: ToolConfig): z.ZodObject<z.ZodRawShape> {
   const isReferenceData = ['stock_basic', 'trade_cal'].includes(apiName);
   const isDailyPrice = ['daily', 'daily_basic'].includes(apiName);
   const isMarketData = ['moneyflow_hsgt', 'margin', 'block_trade', 'limit_list'].includes(apiName);
+  const isWeekMonthAdj = apiName === 'stk_week_month_adj';
 
   if (isFinancialStatement) {
     return z.object({
@@ -94,6 +95,16 @@ export function generateSchema(config: ToolConfig): z.ZodObject<z.ZodRawShape> {
         .describe(
           PARAM_DESCRIPTIONS['trade_date']! + ' If omitted, returns most recent trading day.'
         ),
+    });
+  }
+
+  if (isWeekMonthAdj) {
+    return z.object({
+      ts_code: z.string().optional().describe(PARAM_DESCRIPTIONS['ts_code']!),
+      freq: z.enum(['week', 'month']).describe("Frequency: 'week' for weekly bars, 'month' for monthly bars."),
+      trade_date: z.string().optional().describe(PARAM_DESCRIPTIONS['trade_date']!),
+      start_date: z.string().optional().describe(PARAM_DESCRIPTIONS['start_date']!),
+      end_date: z.string().optional().describe(PARAM_DESCRIPTIONS['end_date']!),
     });
   }
 

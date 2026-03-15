@@ -22,7 +22,7 @@ if (!TOKEN) {
 const BASE_URL = 'https://api.tushare.pro';
 const OUT_DIR = join(
   import.meta.dir,
-  '../src/tools/finance/tushare/__tests__/fixtures/raw'
+  '../__tests__/fixtures/raw'
 );
 
 mkdirSync(OUT_DIR, { recursive: true });
@@ -162,6 +162,19 @@ const fixtures: Array<{
       apiName: 'trade_cal',
       params: { exchange: 'SSE', start_date: SAMPLE_START, end_date: SAMPLE_END },
       fields: ['exchange', 'cal_date', 'is_open', 'pretrade_date'],
+    },
+    // Weekly/monthly adjusted prices
+    {
+      filename: 'stk_week_month_adj.json',
+      apiName: 'stk_week_month_adj',
+      params: { ts_code: SAMPLE_STOCK, freq: 'week', start_date: SAMPLE_START, end_date: SAMPLE_END },
+      fields: [
+        'ts_code', 'trade_date', 'freq',
+        'open', 'high', 'low', 'close', 'pre_close',
+        'open_qfq', 'high_qfq', 'low_qfq', 'close_qfq',
+        'open_hfq', 'high_hfq', 'low_hfq', 'close_hfq',
+        'vol', 'amount', 'change', 'pct_chg',
+      ],
     },
   ];
 
