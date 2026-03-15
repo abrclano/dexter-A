@@ -54,6 +54,10 @@ yarn-error.log*
 
 # Kiro files
 .kiro/
+.gitkeep
+
+# tushare test fixtures
+src/tools/finance/tushare/src/tools/finance/tushare/__tests__/fixtures/raw/
 
 # Dexter context files (offloaded tool outputs)
 .dexter/*

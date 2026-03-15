@@ -1,6 +1,0 @@
-# Tool implementations will be organized in subdirectories:
-# - price/: Price-related tools
-# - fundamentals/: Financial statement tools
-# - market/: Market data tools
-# - reference/: Reference data tools
-# - router.ts: Enhanced cn_market_search router

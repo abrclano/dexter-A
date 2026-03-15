@@ -1,4 +1,0 @@
-# Utility functions will be implemented in subsequent tasks
-# - validation.ts: Input validation and sanitization
-# - formatting.ts: Data formatting utilities
-# - date.ts: Date manipulation helpers (Beijing timezone aware)
