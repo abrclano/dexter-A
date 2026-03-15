@@ -176,6 +176,13 @@ const fixtures: Array<{
         'vol', 'amount', 'change', 'pct_chg',
       ],
     },
+    // Earnings forecast
+    {
+      filename: 'forecast.json',
+      apiName: 'forecast',
+      params: { ts_code: SAMPLE_STOCK, start_date: '20190101', end_date: '20191231' },
+      fields: ['ts_code', 'ann_date', 'end_date', 'type', 'p_change_min', 'p_change_max', 'net_profit_min', 'net_profit_max', 'last_parent_net', 'first_ann_date', 'summary', 'change_reason'],
+    },
   ];
 
 // ── Main ──────────────────────────────────────────────────────────────────────

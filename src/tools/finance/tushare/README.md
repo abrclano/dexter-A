@@ -148,6 +148,19 @@ export const getCnStockHolder = factory.createTool(holderConfig);
 export { getCnStockHolder } from './tools/reference/index.js';
 ```
 
+**5. 在 `scripts/generate-fixtures.ts` 的 `fixtures` 数组中添加对应条目：**
+
+```typescript
+{
+  filename: 'top10_holders.json',
+  apiName: 'top10_holders',
+  params: { ts_code: SAMPLE_STOCK, period: '20231231' },
+  fields: ['ts_code', 'ann_date', 'end_date', 'holder_name', 'hold_amount', 'hold_ratio'],
+},
+```
+
+This ensures `bun run src/tools/finance/tushare/scripts/generate-fixtures.ts` regenerates a real API fixture for the new endpoint alongside all existing ones.
+
 工具会在下次启动时自动被 `cn_market_search` 路由器识别并使用。
 
 ## 缓存策略
