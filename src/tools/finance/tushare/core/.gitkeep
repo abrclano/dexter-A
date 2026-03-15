@@ -1,0 +1,6 @@
+# Core components will be implemented in subsequent tasks
+# - api.ts: Unified API client
+# - cache.ts: Cache manager
+# - error.ts: Error handler
+# - factory.ts: Tool factory
+# - metrics.ts: Metrics tracker

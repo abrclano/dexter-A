@@ -52,6 +52,9 @@ yarn-error.log*
 # Cursor files
 .cursor/
 
+# Kiro files
+.kiro/
+
 # Dexter context files (offloaded tool outputs)
 .dexter/*
 

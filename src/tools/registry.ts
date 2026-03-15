@@ -97,6 +97,15 @@ export function getToolRegistry(model: string): RegisteredTool[] {
     },
   ];
 
+  // Include cn_market_search if TUSHARE_API_KEY is configured
+  if (process.env.TUSHARE_API_KEY) {
+    tools.push({
+      name: 'cn_market_search',
+      tool: createCnMarketSearch(model),
+      description: CN_MARKET_SEARCH_DESCRIPTION,
+    });
+  }
+
   // Include web_search if Exa, Perplexity, or Tavily API key is configured (Exa → Perplexity → Tavily)
   if (process.env.EXASEARCH_API_KEY) {
     tools.push({
