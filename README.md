@@ -1,5 +1,9 @@
 # Dexter 🤖
 
+[English](./README.md) | [中文](./README.zh.md)
+
+> Forked from [virattt/dexter](https://github.com/virattt/dexter). This fork adds **A-share (Chinese stock market) support** via [Tushare](https://tushare.pro).
+
 Dexter is an autonomous financial research agent that thinks, plans, and learns as it works. It performs analysis using task planning, self-reflection, and real-time market data. Think Claude Code, but built specifically for financial research.
 
 <img width="1098" height="659" alt="Screenshot 2026-01-21 at 5 25 10 PM" src="https://github.com/user-attachments/assets/3bcc3a7f-b68a-4f5e-8735-9d22196ff76e" />
@@ -19,26 +23,26 @@ Dexter is an autonomous financial research agent that thinks, plans, and learns 
 
 ## 👋 Overview
 
-Dexter takes complex financial questions and turns them into clear, step-by-step research plans. It runs those tasks using live market data, checks its own work, and refines the results until it has a confident, data-backed answer.  
+Dexter takes complex financial questions and turns them into clear, step-by-step research plans. It runs those tasks using live market data, checks its own work, and refines the results until it has a confident, data-backed answer.
 
 **Key Capabilities:**
 - **Intelligent Task Planning**: Automatically decomposes complex queries into structured research steps
 - **Autonomous Execution**: Selects and executes the right tools to gather financial data
 - **Self-Validation**: Checks its own work and iterates until tasks are complete
 - **Real-Time Financial Data**: Access to income statements, balance sheets, and cash flow statements
+- **A-Share Support**: Query Chinese A-share stocks via Tushare (price history, fundamentals, financials)
 - **Safety Features**: Built-in loop detection and step limits to prevent runaway execution
 
-[![Twitter Follow](https://img.shields.io/twitter/follow/virattt?style=social)](https://twitter.com/virattt) [![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?style=social&logo=discord)](https://discord.gg/jpGHv2XB6T)
-
-<img width="1042" height="638" alt="Screenshot 2026-02-18 at 12 21 25 PM" src="https://github.com/user-attachments/assets/2a6334f9-863f-4bd2-a56f-923e42f4711e" />
+<img width="1042" height="638" alt="Screenshot 2026-02-18 at 12 21 25 PM" src="https://github.com/user-attachments/assets/2a6334f9-863f-4bd2-a56f-923e42f4711e" />
 
 
 ## ✅ Prerequisites
 
 - [Bun](https://bun.com) runtime (v1.0 or higher)
 - OpenAI API key (get [here](https://platform.openai.com/api-keys))
-- Financial Datasets API key (get [here](https://financialdatasets.ai))
-- Exa API key (get [here](https://exa.ai)) - optional, for web search
+- Financial Datasets API key (get [here](https://financialdatasets.ai)) — for US stocks
+- Tushare API token (get [here](https://tushare.pro/register)) — for A-shares
+- Exa API key (get [here](https://exa.ai)) — optional, for web search
 
 #### Installing Bun
 
@@ -84,8 +88,11 @@ cp env.example .env
 # XAI_API_KEY=your-xai-api-key (optional)
 # OPENROUTER_API_KEY=your-openrouter-api-key (optional)
 
-# Institutional-grade market data for agents; AAPL, NVDA, MSFT are free
+# Institutional-grade market data for US stocks; AAPL, NVDA, MSFT are free
 # FINANCIAL_DATASETS_API_KEY=your-financial-datasets-api-key
+
+# Chinese A-share market data (enables cn_market_search tool)
+# TUSHARE_API_KEY=your-tushare-api-key
 
 # (Optional) If using Ollama locally
 # OLLAMA_BASE_URL=http://127.0.0.1:11434
@@ -94,6 +101,29 @@ cp env.example .env
 # EXASEARCH_API_KEY=your-exa-api-key
 # TAVILY_API_KEY=your-tavily-api-key
 ```
+
+## 🇨🇳 A-Share Support (Tushare)
+
+This fork integrates [Tushare](https://tushare.pro) to enable research on Chinese A-share stocks listed on the Shanghai and Shenzhen exchanges.
+
+**What you can do:**
+- Query daily/weekly/monthly price history for A-share tickers (e.g. `000001.SZ`, `600519.SH`)
+- Retrieve fundamental data: P/E, P/B, market cap, turnover rate
+- Access financial statements: income statement, balance sheet, cash flow
+- Look up company profiles and industry classifications
+
+**Setup:**
+1. Register at [tushare.pro](https://tushare.pro/register) and get your API token
+2. Add it to your `.env`:
+   ```
+   TUSHARE_API_KEY=your-tushare-api-key
+   ```
+3. The `cn_market_search` tool will be automatically enabled when the key is present
+
+**Example queries:**
+- "What are the recent trends in Kweichow Moutai's revenue and net profit over the last year?"
+- "Compare the P/E ratio of 600519.SH vs 000858.SZ"
+- "What is the current market cap of BYD (002594.SZ)?"
 
 ## 🚀 How to Run
 
@@ -172,7 +202,7 @@ For detailed setup instructions, configuration options, and troubleshooting, see
 4. Push to the branch
 5. Create a Pull Request
 
-**Important**: Please keep your pull requests small and focused.  This will make it easier to review and merge.
+**Important**: Please keep your pull requests small and focused. This will make it easier to review and merge.
 
 
 ## 📄 License
