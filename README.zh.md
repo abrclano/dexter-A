@@ -123,6 +123,8 @@ cp env.example .env
 - "对比 600519.SH 和 000858.SZ 的市盈率"
 - "比亚迪（002594.SZ）当前市值是多少？"
 
+完整的接口列表和开发者指南，请参阅 [Tushare 模块文档](src/tools/finance/tushare/README.zh.md)。
+
 
 ## 🚀 运行
 

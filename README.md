@@ -125,6 +125,8 @@ This fork integrates [Tushare](https://tushare.pro) to enable research on Chines
 - "Compare the P/E ratio of 600519.SH vs 000858.SZ"
 - "What is the current market cap of BYD (002594.SZ)?"
 
+For the full list of supported APIs and developer guide, see the [Tushare Module README](src/tools/finance/tushare/README.md).
+
 ## 🚀 How to Run
 
 Run Dexter in interactive mode:

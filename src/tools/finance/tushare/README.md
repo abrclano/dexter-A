@@ -1,68 +1,113 @@
 # Tushare Module
 
-A股市场数据集成模块，基于 [Tushare Pro](https://tushare.pro) API，为 Dexter agent 提供 `cn_market_search` 工具。
+[English](./README.en.md) | [中文](./README.zh.md)
 
-## 目录结构
+A-share market data integration module powered by the [Tushare Pro](https://tushare.pro) API, providing the `cn_market_search` tool for the Dexter agent.
+
+## Supported APIs
+
+### Price Data
+
+| Tool | Tushare API | Description |
+|------|-------------|-------------|
+| `get_cn_stock_price` | `daily` | Latest daily OHLCV for a single stock |
+| `get_cn_stock_prices` | `daily` | Historical daily OHLCV over a date range |
+| `get_cn_stock_basic` | `daily_basic` | Daily valuation metrics (PE, PB, market cap, turnover rate, etc.) |
+| `get_cn_stock_week_month_adj` | `stk_week_month_adj` | Weekly/monthly OHLCV with forward/backward adjusted prices |
+
+### Financial Statements
+
+| Tool | Tushare API | Description |
+|------|-------------|-------------|
+| `get_cn_income` | `income` | Income statement (revenue, profit, EPS, etc.) |
+| `get_cn_balance` | `balancesheet` | Balance sheet (assets, liabilities, equity, etc.) |
+| `get_cn_cashflow` | `cashflow` | Cash flow statement (operating/investing/financing) |
+| `get_cn_indicators` | `fina_indicator` | Financial ratios (ROE, ROA, gross margin, debt ratio, etc.) |
+
+### Market Data
+
+| Tool | Tushare API | Description |
+|------|-------------|-------------|
+| `get_cn_northbound_flow` | `moneyflow_hsgt` | Northbound capital flow via Hong Kong Stock Connect |
+| `get_cn_margin_data` | `margin` | Margin trading data (margin balance, short balance, etc.) |
+| `get_cn_block_trades` | `block_trade` | Block trades (large institutional transactions) |
+| `get_cn_limit_list` | `limit_list` | Daily limit-up/limit-down list with consecutive count |
+
+### Disclosure & Events
+
+| Tool | Tushare API | Description |
+|------|-------------|-------------|
+| `get_cn_forecast` | `forecast` | Earnings forecasts (profit increase/decrease/turnaround, etc.) |
+| `get_cn_express` | `express` | Earnings express reports (preliminary results before full filing) |
+
+### Reference Data
+
+| Tool | Tushare API | Description |
+|------|-------------|-------------|
+| `get_cn_stock_list` | `stock_basic` | A-share stock list (code, name, industry, listing date, etc.) |
+| `get_cn_trade_calendar` | `trade_cal` | Trading calendar (check if a date is a trading day) |
+
+## Directory Structure
 
 ```
 tushare/
-├── core/           # 核心基础设施（API 客户端、缓存、错误处理、工厂、指标）
-├── config/         # 工具配置（tools.config.ts）
-├── tools/          # 各类工具实现
-│   ├── price/      # 价格数据（日线、估值指标）
-│   ├── fundamentals/ # 财务报表（利润表、资产负债表、现金流、财务指标）
-│   ├── market/     # 市场数据（北向资金、融资融券、大宗交易、涨跌停）
-│   ├── reference/  # 参考数据（股票列表、交易日历）
-│   └── router.ts   # cn_market_search 路由工具
-├── types/          # TypeScript 类型定义
-├── utils/          # 工具函数（日期、验证、格式化）
-├── scripts/        # 辅助脚本
-└── __tests__/      # 测试与 fixtures
+├── core/           # Core infrastructure (API client, cache, error handling, factory, metrics)
+├── config/         # Tool configuration (tools.config.ts)
+├── tools/          # Tool implementations
+│   ├── price/      # Price data (daily bars, valuation metrics)
+│   ├── fundamentals/ # Financial statements (income, balance sheet, cash flow, indicators)
+│   ├── market/     # Market data (northbound flow, margin, block trades, limit list)
+│   ├── reference/  # Reference data (stock list, trade calendar)
+│   └── router.ts   # cn_market_search routing tool
+├── types/          # TypeScript type definitions
+├── utils/          # Utility functions (date, validation, formatting)
+├── scripts/        # Helper scripts
+└── __tests__/      # Tests and fixtures
 ```
 
-## 快速开始
+## Quick Start
 
-在 `.env` 中设置 API key：
+Set your API key in `.env`:
 
 ```
 TUSHARE_API_KEY=your-tushare-api-key
 ```
 
-启动 Dexter 后，agent 会自动注册 `cn_market_search` 工具，可以直接用自然语言查询：
+Once Dexter starts, the `cn_market_search` tool is automatically registered. You can query it in natural language:
 
 ```
-贵州茅台最近的股价是多少？
-分析宁德时代过去三年的财务状况
-北向资金最近一周的流入情况
+What is the latest price of Kweichow Moutai?
+Analyze CATL's financials over the past three years
+Show northbound capital flow for the past week
 ```
 
-## 运行测试
+## Running Tests
 
 ```bash
-# 运行所有测试（无需 API key，使用内置 fixtures）
+# Run all tests (no API key needed — uses built-in fixtures)
 bun test src/tools/finance/tushare
 
-# 运行单个测试文件
+# Run a single test file
 bun test src/tools/finance/tushare/__tests__/core.test.ts
 ```
 
-### 生成真实 API fixtures
+### Regenerating API Fixtures
 
-测试默认使用内置的 stub fixtures，无需网络请求。如果需要用真实 API 数据更新 fixtures：
+Tests use stub fixtures by default and require no network access. To refresh fixtures with real API data:
 
 ```bash
 TUSHARE_API_KEY=your-key bun run src/tools/finance/tushare/scripts/generate-fixtures.ts
 ```
 
-生成的文件保存在 `__tests__/fixtures/raw/`，会被 `__tests__/fixtures.ts` 自动加载。
+Generated files are saved to `__tests__/fixtures/raw/` and auto-loaded by `__tests__/fixtures.ts`.
 
-## 新增接口字段
+## Extension Guide
 
-### 场景一：给现有工具增加字段
+### Adding a field to an existing tool
 
-以给 `get_cn_stock_price` 增加 `turnover_rate`（换手率）为例：
+To add `turnover_rate` to `get_cn_stock_price`:
 
-**1. 在 `config/tools.config.ts` 的对应配置里添加字段名：**
+**1. Add the field name in `config/tools.config.ts`:**
 
 ```typescript
 {
@@ -70,44 +115,31 @@ TUSHARE_API_KEY=your-key bun run src/tools/finance/tushare/scripts/generate-fixt
   fields: [
     'ts_code', 'trade_date', 'open', 'high', 'low', 'close',
     'pre_close', 'change', 'pct_chg', 'vol', 'amount',
-    'turnover_rate',  // 新增
+    'turnover_rate',  // new
   ],
-  // ...其余配置不变
 }
 ```
 
-**2. 在 `types/price.ts` 的对应接口里添加类型：**
+**2. Add the type in `types/price.ts`:**
 
 ```typescript
 interface DailyPrice {
-  // ...已有字段
-  turnover_rate?: number;  // 换手率（%）
+  turnover_rate?: number;  // turnover rate (%)
 }
 ```
 
-完成。工厂会自动将新字段包含在 API 请求和响应中。
+The factory automatically includes the new field in API requests and responses.
 
-### 场景二：新增一个完整工具
+### Adding a new tool
 
-以新增 `get_cn_stock_holder`（十大股东）为例：
+To add `get_cn_stock_holder` (top 10 shareholders):
 
-**1. 在 `config/tools.config.ts` 的 `TOOL_CONFIGS` 数组中添加配置：**
+**1. Add a config entry to `TOOL_CONFIGS` in `config/tools.config.ts`:**
 
 ```typescript
 {
   name: 'get_cn_stock_holder',
-  description: `获取A股上市公司十大股东信息。
-
-When to Use:
-- 查询主要股东持股比例
-- 分析股权结构变化
-
-When NOT to Use:
-- 实时持仓数据（Tushare 仅提供定期披露数据）
-
-Example:
-- ts_code: "600519.SH"
-- period: "20231231"`,
+  description: `Fetches top 10 shareholders for a Chinese A-share company. ...`,
   apiName: 'top10_holders',
   fields: ['ts_code', 'ann_date', 'end_date', 'holder_name', 'hold_amount', 'hold_ratio'],
   cacheStrategy: CacheStrategy.FINANCIAL,
@@ -118,67 +150,28 @@ Example:
 },
 ```
 
-**2. 在 `types/` 下添加对应类型（可选，放入已有文件或新建）：**
+**2. Add types under `types/`, export from the relevant `tools/` subdirectory, and re-export from `index.ts`.**
 
-```typescript
-// types/reference.ts
-interface StockHolder {
-  ts_code: TsCode;
-  ann_date: DateYYYYMMDD;
-  end_date: DateYYYYMMDD;
-  holder_name: string;
-  hold_amount: number;
-  hold_ratio: number;
-}
-```
+**3. Add a fixture entry in `scripts/generate-fixtures.ts`.**
 
-**3. 在 `tools/reference/index.ts` 中导出新工具：**
+The tool will be automatically picked up by the `cn_market_search` router on next startup.
 
-```typescript
-import { factory } from '../../core/factory.js';
-import { TOOL_CONFIGS } from '../../config/tools.config.js';
+## Cache Strategies
 
-const holderConfig = TOOL_CONFIGS.find(c => c.name === 'get_cn_stock_holder')!;
-export const getCnStockHolder = factory.createTool(holderConfig);
-```
+| Strategy | TTL | Use Case |
+|----------|-----|----------|
+| `HISTORICAL` | Permanent (past dates) / 5 min (today) | Historical prices, past financials |
+| `CURRENT_DAY` | 5 minutes | Today's quotes, valuation metrics |
+| `FINANCIAL` | 24 hours | Financial statements, indicators |
+| `REFERENCE` | 7 days | Stock list, trade calendar |
+| `NO_CACHE` | No cache | Data requiring maximum freshness |
 
-**4. 在 `index.ts` 中导出：**
+## Stock Code Format
 
-```typescript
-export { getCnStockHolder } from './tools/reference/index.js';
-```
+| Exchange | Format | Example |
+|----------|--------|---------|
+| Shanghai (SSE) | `XXXXXX.SH` | `600519.SH` |
+| Shenzhen (SZSE) | `XXXXXX.SZ` | `000858.SZ` |
+| Beijing (BSE) | `XXXXXX.BJ` | `430047.BJ` |
 
-**5. 在 `scripts/generate-fixtures.ts` 的 `fixtures` 数组中添加对应条目：**
-
-```typescript
-{
-  filename: 'top10_holders.json',
-  apiName: 'top10_holders',
-  params: { ts_code: SAMPLE_STOCK, period: '20231231' },
-  fields: ['ts_code', 'ann_date', 'end_date', 'holder_name', 'hold_amount', 'hold_ratio'],
-},
-```
-
-This ensures `bun run src/tools/finance/tushare/scripts/generate-fixtures.ts` regenerates a real API fixture for the new endpoint alongside all existing ones.
-
-工具会在下次启动时自动被 `cn_market_search` 路由器识别并使用。
-
-## 缓存策略
-
-| 策略 | TTL | 适用场景 |
-|------|-----|---------|
-| `HISTORICAL` | 永久（历史日期）/ 5分钟（当日） | 历史价格、历史财报 |
-| `CURRENT_DAY` | 5 分钟 | 当日行情、估值指标 |
-| `FINANCIAL` | 24 小时 | 财务报表、财务指标 |
-| `REFERENCE` | 7 天 | 股票列表、交易日历 |
-| `NO_CACHE` | 不缓存 | 实时性要求极高的数据 |
-
-## 股票代码格式
-
-| 市场 | 格式 | 示例 |
-|------|------|------|
-| 上交所 | `XXXXXX.SH` | `600519.SH` |
-| 深交所 | `XXXXXX.SZ` | `000858.SZ` |
-| 北交所 | `XXXXXX.BJ` | `430047.BJ` |
-
-日期格式统一使用 `YYYYMMDD`，例如 `20240115`。
+All dates use `YYYYMMDD` format, e.g. `20240115`.
