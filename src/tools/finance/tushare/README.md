@@ -2,7 +2,7 @@
 
 [English](./README.en.md) | [中文](./README.zh.md)
 
-A-share market data integration module powered by the [Tushare Pro](https://tushare.pro) API, providing the `cn_market_search` tool for the Dexter agent.
+A-share market data integration module powered by the [Tushare Pro](https://tushare.pro) API, providing the `tushare_search` tool for the Dexter agent.
 
 ## Supported APIs
 
@@ -58,7 +58,7 @@ tushare/
 │   ├── fundamentals/ # Financial statements (income, balance sheet, cash flow, indicators)
 │   ├── market/     # Market data (northbound flow, margin, block trades, limit list)
 │   ├── reference/  # Reference data (stock list, trade calendar)
-│   └── router.ts   # cn_market_search routing tool
+│   └── router.ts   # tushare_search routing tool
 ├── types/          # TypeScript type definitions
 ├── utils/          # Utility functions (date, validation, formatting)
 ├── scripts/        # Helper scripts
@@ -73,7 +73,7 @@ Set your API key in `.env`:
 TUSHARE_API_KEY=your-tushare-api-key
 ```
 
-Once Dexter starts, the `cn_market_search` tool is automatically registered. You can query it in natural language:
+Once Dexter starts, the `tushare_search` tool is automatically registered. You can query it in natural language:
 
 ```
 What is the latest price of Kweichow Moutai?
@@ -154,7 +154,7 @@ To add `get_cn_stock_holder` (top 10 shareholders):
 
 **3. Add a fixture entry in `scripts/generate-fixtures.ts`.**
 
-The tool will be automatically picked up by the `cn_market_search` router on next startup.
+The tool will be automatically picked up by the `tushare_search` router on next startup.
 
 ## Cache Strategies
 

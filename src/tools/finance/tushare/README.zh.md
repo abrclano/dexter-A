@@ -2,7 +2,7 @@
 
 [English](./README.md) | [中文](./README.zh.md)
 
-A 股市场数据集成模块，基于 [Tushare Pro](https://tushare.pro) API，为 Dexter agent 提供 `cn_market_search` 工具。
+A 股市场数据集成模块，基于 [Tushare Pro](https://tushare.pro) API，为 Dexter agent 提供 `tushare_search` 工具。
 
 ## 已支持接口
 
@@ -58,7 +58,7 @@ tushare/
 │   ├── fundamentals/ # 财务报表（利润表、资产负债表、现金流、财务指标）
 │   ├── market/     # 市场数据（北向资金、融资融券、大宗交易、涨跌停）
 │   ├── reference/  # 参考数据（股票列表、交易日历）
-│   └── router.ts   # cn_market_search 路由工具
+│   └── router.ts   # tushare_search 路由工具
 ├── types/          # TypeScript 类型定义
 ├── utils/          # 工具函数（日期、验证、格式化）
 ├── scripts/        # 辅助脚本
@@ -73,7 +73,7 @@ tushare/
 TUSHARE_API_KEY=your-tushare-api-key
 ```
 
-启动 Dexter 后，agent 会自动注册 `cn_market_search` 工具，可以直接用自然语言查询：
+启动 Dexter 后，agent 会自动注册 `tushare_search` 工具，可以直接用自然语言查询：
 
 ```
 贵州茅台最近的股价是多少？
@@ -154,7 +154,7 @@ interface DailyPrice {
 
 **3. 在 `scripts/generate-fixtures.ts` 的 `fixtures` 数组中添加对应条目。**
 
-工具会在下次启动时自动被 `cn_market_search` 路由器识别并使用。
+工具会在下次启动时自动被 `tushare_search` 路由器识别并使用。
 
 ## 缓存策略
 

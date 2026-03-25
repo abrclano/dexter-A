@@ -91,8 +91,11 @@ cp env.example .env
 # Institutional-grade market data for US stocks; AAPL, NVDA, MSFT are free
 # FINANCIAL_DATASETS_API_KEY=your-financial-datasets-api-key
 
-# Chinese A-share market data (enables cn_market_search tool)
-# TUSHARE_API_KEY=your-tushare-api-key
+# Chinese A-share Market Data
+# Tushare API Key
+##TUSHARE_API_KEY=your-tushare-api-key
+# East Money MX API Key
+#MX_APIKEY=your-eastmoneymx-api-key
 
 # (Optional) If using Ollama locally
 # OLLAMA_BASE_URL=http://127.0.0.1:11434
@@ -118,7 +121,7 @@ This fork integrates [Tushare](https://tushare.pro) to enable research on Chines
    ```
    TUSHARE_API_KEY=your-tushare-api-key
    ```
-3. The `cn_market_search` tool will be automatically enabled when the key is present
+3. The `tushare_search` tool will be automatically enabled when the key is present
 
 **Example queries:**
 - "What are the recent trends in Kweichow Moutai's revenue and net profit over the last year?"

@@ -89,8 +89,11 @@ cp env.example .env
 # 美股机构级行情数据；AAPL、NVDA、MSFT 免费
 # FINANCIAL_DATASETS_API_KEY=your-financial-datasets-api-key
 
-# A 股行情数据（启用 cn_market_search 工具）
-# TUSHARE_API_KEY=your-tushare-api-key
+# A 股行情数据
+# Tushare API Key
+##TUSHARE_API_KEY=your-tushare-api-key
+# East Money MX API Key
+#MX_APIKEY=your-eastmoneymx-api-key
 
 # 本地 Ollama（可选）
 # OLLAMA_BASE_URL=http://127.0.0.1:11434
@@ -116,7 +119,7 @@ cp env.example .env
    ```
    TUSHARE_API_KEY=your-tushare-api-key
    ```
-3. 配置 Token 后，`cn_market_search` 工具将自动启用
+3. 配置 Token 后，`tushare_search` 工具将自动启用
 
 **示例查询：**
 - "贵州茅台最近一年的营收和净利润趋势如何？"
