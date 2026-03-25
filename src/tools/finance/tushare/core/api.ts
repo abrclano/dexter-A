@@ -1,6 +1,6 @@
 /**
  * Unified API Client for Tushare
- * 
+ *
  * Provides a single, robust interface for all Tushare API interactions with:
  * - Retry logic with exponential backoff
  * - Rate limit handling
@@ -69,11 +69,11 @@ class Semaphore {
 
 /**
  * GLOBAL SINGLETON SEMAPHORE
- * 
+ *
  * CRITICAL: This must be a global singleton shared across all API client instances.
  * When the router calls 10 tools in parallel, and each tool makes API requests,
  * this ensures the total concurrent requests to Tushare never exceeds 5.
- * 
+ *
  * Without a global singleton, each tool instance would create its own semaphore,
  * defeating the purpose of rate limiting.
  */
@@ -140,14 +140,6 @@ export class TushareApiClientImpl implements TushareApiClient {
     errorHandler: ErrorHandler,
     metrics: MetricsTracker
   ) {
-    if (!token) {
-      throw new TushareError(
-        'TUSHARE_API_KEY environment variable is not set',
-        'MISSING_TOKEN',
-        'Set the TUSHARE_API_KEY environment variable with your API token from https://tushare.pro'
-      );
-    }
-
     this.token = token;
     this.cache = cache;
     this.errorHandler = errorHandler;
@@ -160,6 +152,15 @@ export class TushareApiClientImpl implements TushareApiClient {
   async call<T>(request: TushareRequest): Promise<TushareResponse<T>> {
     const options = { ...DEFAULT_OPTIONS, ...request.options };
     const startTime = Date.now();
+
+    // Check if token is set before attempting API call
+    if (!this.token) {
+      throw new TushareError(
+        'TUSHARE_API_KEY environment variable is not set',
+        'MISSING_TOKEN',
+        'Set the TUSHARE_API_KEY environment variable with your API token from https://tushare.pro'
+      );
+    }
 
     // 1. Check cache
     if (options.cacheable) {

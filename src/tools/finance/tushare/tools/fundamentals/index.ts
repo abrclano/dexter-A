@@ -34,7 +34,14 @@ const FUNDAMENTAL_NAMES = [
 
 const tools = factory.createTools(
   TOOL_CONFIGS.filter((c) => FUNDAMENTAL_NAMES.includes(c.name))
-) as [DynamicStructuredTool, DynamicStructuredTool, DynamicStructuredTool, DynamicStructuredTool, DynamicStructuredTool, DynamicStructuredTool];
+) as [
+    DynamicStructuredTool,
+    DynamicStructuredTool,
+    DynamicStructuredTool,
+    DynamicStructuredTool,
+    DynamicStructuredTool,
+    DynamicStructuredTool,
+  ];
 
 const [getCnIncome, getCnBalance, getCnCashflow, getCnIndicators, getCnForecast, getCnExpress] = tools;
 
