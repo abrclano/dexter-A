@@ -14,6 +14,7 @@ import { heartbeatTool, HEARTBEAT_TOOL_DESCRIPTION } from './heartbeat/heartbeat
 import { memoryGetTool, MEMORY_GET_DESCRIPTION, memorySearchTool, MEMORY_SEARCH_DESCRIPTION, memoryUpdateTool, MEMORY_UPDATE_DESCRIPTION } from './memory/index.js';
 import { discoverSkills } from '../skills/index.js';
 import { createCnMarketSearch, CN_MARKET_SEARCH_DESCRIPTION } from './finance/tushare/index.js';
+import { createEastmoneySearch, EASTMONEY_DATA_DESCRIPTION, EASTMONEY_SEARCH_DESCRIPTION, EASTMONEY_SELFSELECT_DESCRIPTION, EASTMONEY_STOCK_SIMULATOR_DESCRIPTION } from './finance/eastmoney/index.js';
 
 /**
  * A registered tool with its rich description for system prompt injection.
@@ -111,6 +112,32 @@ export function getToolRegistry(model: string): RegisteredTool[] {
       tool: createCnMarketSearch(model),
       description: CN_MARKET_SEARCH_DESCRIPTION,
     });
+  }
+
+  // Include eastmoney tools if MX_APIKEY is configured
+  if (process.env.MX_APIKEY) {
+    tools.push(
+      {
+        name: 'eastmoney_mx_data',
+        tool: createEastmoneySearch(model, 'mx-data'),
+        description: EASTMONEY_DATA_DESCRIPTION,
+      },
+      {
+        name: 'eastmoney_mx_search',
+        tool: createEastmoneySearch(model, 'mx-search'),
+        description: EASTMONEY_SEARCH_DESCRIPTION,
+      },
+      {
+        name: 'eastmoney_mx_selfselect',
+        tool: createEastmoneySearch(model, 'mx-selfselect'),
+        description: EASTMONEY_SELFSELECT_DESCRIPTION,
+      },
+      {
+        name: 'eastmoney_mx_stock_simulator',
+        tool: createEastmoneySearch(model, 'mx-stock-simulator'),
+        description: EASTMONEY_STOCK_SIMULATOR_DESCRIPTION,
+      }
+    );
   }
 
   // Include web_search if Exa, Perplexity, or Tavily API key is configured (Exa → Perplexity → Tavily)

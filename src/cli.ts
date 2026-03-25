@@ -53,8 +53,11 @@ function summarizeToolResult(tool: string, args: Record<string, unknown>, result
         if (tool === 'financial_search') {
           return keys.length === 1 ? 'Called 1 data source' : `Called ${keys.length} data sources`;
         }
-        if (tool === 'web_search') {
-          return 'Did 1 search';
+        if (tool === 'read_file') {
+          return `Read ${keys.length} file content`;
+        }
+        if (tool === 'eastmoney_mx_data' || tool === 'eastmoney_mx_search' || tool === 'eastmoney_mx_selfselect' || tool === 'eastmoney_mx_stock_simulator') {
+          return `Retrieved ${keys.length} Eastmoney data`;
         }
         return `Received ${keys.length} fields`;
       }
