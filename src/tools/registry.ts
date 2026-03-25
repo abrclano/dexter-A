@@ -13,7 +13,7 @@ import { READ_FILINGS_DESCRIPTION } from './finance/read-filings.js';
 import { heartbeatTool, HEARTBEAT_TOOL_DESCRIPTION } from './heartbeat/heartbeat-tool.js';
 import { memoryGetTool, MEMORY_GET_DESCRIPTION, memorySearchTool, MEMORY_SEARCH_DESCRIPTION, memoryUpdateTool, MEMORY_UPDATE_DESCRIPTION } from './memory/index.js';
 import { discoverSkills } from '../skills/index.js';
-import { createCnMarketSearch, CN_MARKET_SEARCH_DESCRIPTION } from './finance/tushare/index.js';
+import { createTushareSearch, TUSHARE_SEARCH_DESCRIPTION } from './finance/tushare/index.js';
 import { createEastmoneySearch, EASTMONEY_DATA_DESCRIPTION, EASTMONEY_SEARCH_DESCRIPTION, EASTMONEY_SELFSELECT_DESCRIPTION, EASTMONEY_STOCK_SIMULATOR_DESCRIPTION } from './finance/eastmoney/index.js';
 
 /**
@@ -105,12 +105,12 @@ export function getToolRegistry(model: string): RegisteredTool[] {
     );
   }
 
-  // Include cn_market_search if TUSHARE_API_KEY is configured
+  // Include tushare_search if TUSHARE_API_KEY is configured
   if (process.env.TUSHARE_API_KEY) {
     tools.push({
-      name: 'cn_market_search',
-      tool: createCnMarketSearch(model),
-      description: CN_MARKET_SEARCH_DESCRIPTION,
+      name: 'tushare_search',
+      tool: createTushareSearch(model),
+      description: TUSHARE_SEARCH_DESCRIPTION,
     });
   }
 

@@ -33,7 +33,6 @@ Intelligent meta-tool for financial data research. Takes a natural language quer
 - Questions that don't require external financial data (answer directly from knowledge)
 - Non-public company information
 - Real-time trading or order execution
-- Chinese A-share market data (use cn_market_search instead when TUSHARE_API_KEY is configured)
 
 ## Usage Notes
 

@@ -1,5 +1,5 @@
 /**
- * Enhanced cn_market_search router
+ * Enhanced tushare_search router
  *
  * Routes natural language queries to appropriate Tushare tools using a
  * two-phase approach:
@@ -393,7 +393,7 @@ async function executeToolsInParallel(toolCalls: ToolCall[]): Promise<{
 // Router Schema & Description
 // ============================================================================
 
-export const CN_MARKET_SEARCH_DESCRIPTION = `
+export const TUSHARE_SEARCH_DESCRIPTION = `
 Intelligent meta-tool for Chinese A-share stock market data research. Takes a natural language query (Chinese or English) and automatically routes to appropriate Tushare data tools.
 
 ## When to Use
@@ -424,7 +424,7 @@ Intelligent meta-tool for Chinese A-share stock market data research. Takes a na
 - A-share code format: 000001.SZ (Shenzhen), 600519.SH (Shanghai), 830799.BJ (BSE)
 `.trim();
 
-const CnMarketSearchSchema = z.object({
+const TushareSearchSchema = z.object({
   query: z.string().describe(
     'Natural language query about Chinese A-share market data (Chinese or English)'
   ),
@@ -434,11 +434,11 @@ const CnMarketSearchSchema = z.object({
 // Router Factory
 // ============================================================================
 
-export function createCnMarketSearch(model: string): DynamicStructuredTool {
+export function createTushareSearch(model: string): DynamicStructuredTool {
   return new DynamicStructuredTool({
-    name: 'cn_market_search',
-    description: CN_MARKET_SEARCH_DESCRIPTION,
-    schema: CnMarketSearchSchema,
+    name: 'tushare_search',
+    description: TUSHARE_SEARCH_DESCRIPTION,
+    schema: TushareSearchSchema,
     func: async (input, _runManager, config?: RunnableConfig) => {
       const onProgress = config?.metadata?.onProgress as ((msg: string) => void) | undefined;
       const startTime = Date.now();

@@ -27,7 +27,7 @@ export { getCnStockList, getCnTradeCalendar } from './tools/reference/index.js';
 
 // ── Router ────────────────────────────────────────────────────────────────────
 
-export { createCnMarketSearch, CN_MARKET_SEARCH_DESCRIPTION } from './tools/router.js';
+export { createTushareSearch, TUSHARE_SEARCH_DESCRIPTION } from './tools/router.js';
 
 // ── Validators ────────────────────────────────────────────────────────────────
 
