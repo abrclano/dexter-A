@@ -2,7 +2,7 @@
 
 [English](./README.md) | [中文](./README.zh.md)
 
-> Forked from [virattt/dexter](https://github.com/virattt/dexter). This fork adds **A-share (Chinese stock market) support** via [Tushare](https://tushare.pro).
+> Forked from [virattt/dexter](https://github.com/virattt/dexter). This fork adds **A-share (Chinese stock market) support**.
 
 Dexter is an autonomous financial research agent that thinks, plans, and learns as it works. It performs analysis using task planning, self-reflection, and real-time market data. Think Claude Code, but built specifically for financial research.
 
@@ -30,7 +30,7 @@ Dexter takes complex financial questions and turns them into clear, step-by-step
 - **Autonomous Execution**: Selects and executes the right tools to gather financial data
 - **Self-Validation**: Checks its own work and iterates until tasks are complete
 - **Real-Time Financial Data**: Access to income statements, balance sheets, and cash flow statements
-- **A-Share Support**: Query Chinese A-share stocks via Tushare (price history, fundamentals, financials)
+- **A-Share Support**: Query Chinese A-share stocks (price history, fundamentals, financials)
 - **Safety Features**: Built-in loop detection and step limits to prevent runaway execution
 
 <img width="1042" height="638" alt="Screenshot 2026-02-18 at 12 21 25 PM" src="https://github.com/user-attachments/assets/2a6334f9-863f-4bd2-a56f-923e42f4711e" />
@@ -41,7 +41,8 @@ Dexter takes complex financial questions and turns them into clear, step-by-step
 - [Bun](https://bun.com) runtime (v1.0 or higher)
 - OpenAI API key (get [here](https://platform.openai.com/api-keys))
 - Financial Datasets API key (get [here](https://financialdatasets.ai)) — for US stocks
-- Tushare API token (get [here](https://tushare.pro/register)) — for A-shares
+- Tushare API key (get [here](https://tushare.pro/register)) — for A-shares
+- East Money MX API key (get [here](https://marketing.dfcfs.com/views/finskillshub/)) — for A-shares
 - Exa API key (get [here](https://exa.ai)) — optional, for web search
 
 #### Installing Bun
@@ -93,9 +94,9 @@ cp env.example .env
 
 # Chinese A-share Market Data
 # Tushare API Key
-##TUSHARE_API_KEY=your-tushare-api-key
+# TUSHARE_API_KEY=your-tushare-api-key
 # East Money MX API Key
-#MX_APIKEY=your-eastmoneymx-api-key
+# MX_APIKEY=your-eastmoneymx-api-key
 
 # (Optional) If using Ollama locally
 # OLLAMA_BASE_URL=http://127.0.0.1:11434
@@ -105,9 +106,9 @@ cp env.example .env
 # TAVILY_API_KEY=your-tavily-api-key
 ```
 
-## 🇨🇳 A-Share Support (Tushare)
+## 🇨🇳 A-Share Support
 
-This fork integrates [Tushare](https://tushare.pro) to enable research on Chinese A-share stocks listed on the Shanghai and Shenzhen exchanges.
+This fork integrates [Tushare](https://tushare.pro) and [EastMoney MX](https://marketing.dfcfs.com/views/finskillshub/) to enable research on Chinese A-share stocks listed on the Shanghai and Shenzhen exchanges.
 
 **What you can do:**
 - Query daily/weekly/monthly price history for A-share tickers (e.g. `000001.SZ`, `600519.SH`)
@@ -116,7 +117,7 @@ This fork integrates [Tushare](https://tushare.pro) to enable research on Chines
 - Look up company profiles and industry classifications
 
 **Setup:**
-1. Register at [tushare.pro](https://tushare.pro/register) and get your API token
+1. Register at [tushare.pro](https://tushare.pro/register) and get your API key
 2. Add it to your `.env`:
    ```
    TUSHARE_API_KEY=your-tushare-api-key
@@ -129,6 +130,38 @@ This fork integrates [Tushare](https://tushare.pro) to enable research on Chines
 - "What is the current market cap of BYD (002594.SZ)?"
 
 For the full list of supported APIs and developer guide, see the [Tushare Module README](src/tools/finance/tushare/README.md).
+
+### EastMoney MX - Advanced Financial Data
+
+**EastMoney MX** integrates real-time market data and institutional-grade financial data from East Money's proprietary database:
+
+**What you can do:**
+- Query real-time quote data for stocks, indices, funds, and bonds
+- Access comprehensive financial statements and corporate fundamentals
+- Retrieve relationship data between companies, shareholders, and executives
+- Search for industry analysis and valuation metrics
+- Extract business information and financing details
+
+**Setup:**
+1. Get your API Key from [EastMoney MX Skills Hub](https://marketing.dfcfs.com/views/finskillshub/)
+2. Add it to your `.env`:
+   ```
+   MX_APIKEY=your-eastmoney-mx-api-key
+   ```
+3. The `EastMoney MX(data, search, self-select, simulator)` skill will be automatically enabled when the key is present
+
+**Example queries:**
+- "Get the latest stock price and market data for 600519.SH"
+- "What are the latest financial metrics and PE ratio for major tech companies?"
+- "Retrieve balance sheet data for listed companies in the pharmaceutical sector"
+- "Find information about executives and shareholders of company 002594.SZ"
+
+**Output formats:**
+- Excel files with multiple sheets for organized data visualization
+- JSON format for programmatic access
+- Text descriptions summarizing query results
+
+For detailed API documentation and usage examples, visit the [EastMoney MX Documentation](https://marketing.dfcfs.com/views/finskillshub/).
 
 ## 🚀 How to Run
 
