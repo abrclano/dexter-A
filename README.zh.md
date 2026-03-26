@@ -108,6 +108,10 @@ cp env.example .env
 
 本 Fork 集成了 [Tushare](https://tushare.pro) 以及 [EastMoney MX](https://marketing.dfcfs.com/views/finskillshub/)，支持对上交所和深交所 A 股上市公司进行研究分析。
 
+### Tushare — 积分制金融数据平台
+
+**Tushare**提供股票、基金、期货等市场的标准化历史行情与基本面数据接口:
+
 **支持的功能：**
 - 查询 A 股日/周/月 K 线数据（如 `000001.SZ`、`600519.SH`）
 - 获取基本面数据：市盈率、市净率、市值、换手率

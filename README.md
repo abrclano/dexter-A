@@ -110,6 +110,10 @@ cp env.example .env
 
 This fork integrates [Tushare](https://tushare.pro) and [EastMoney MX](https://marketing.dfcfs.com/views/finskillshub/) to enable research on Chinese A-share stocks listed on the Shanghai and Shenzhen exchanges.
 
+### Tushare - Credit-based Financial Data Platform
+
+**Tushare** provides standardized historical market data and fundamental data interfaces for stocks, funds, futures, and other markets:
+
 **What you can do:**
 - Query daily/weekly/monthly price history for A-share tickers (e.g. `000001.SZ`, `600519.SH`)
 - Retrieve fundamental data: P/E, P/B, market cap, turnover rate
