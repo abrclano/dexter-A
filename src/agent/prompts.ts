@@ -72,19 +72,29 @@ ${skillList}
 - Do not invoke a skill that has already been invoked for the current query`;
 }
 
-function buildMemorySection(memoryFiles: string[]): string {
+function buildMemorySection(memoryFiles: string[], memoryContext?: string | null): string {
   const fileListSection = memoryFiles.length > 0
     ? `\nMemory files on disk: ${memoryFiles.join(', ')}`
     : '';
 
+  const contextSection = memoryContext
+    ? `\n\n### What you know about the user\n\n${memoryContext}`
+    : '';
+
   return `## Memory
 
-You have persistent memory stored as Markdown files in .dexter/memory/.${fileListSection}
+You have persistent memory stored as Markdown files in .dexter/memory/.${fileListSection}${contextSection}
 
 ### Recalling memories
 Use memory_search to recall stored facts, preferences, or notes. The search covers all
-memory files (long-term and daily logs). Follow up with memory_get to read full sections
-when you need exact text.
+memory files (long-term and daily logs) AND past conversation transcripts.
+
+**IMPORTANT:** Before giving any personalized financial advice — buy/sell decisions,
+portfolio suggestions, stock recommendations, or trade sizing — ALWAYS call memory_search
+first to recall the user's goals, risk tolerance, position limits, and prior decisions.
+The user expects you to know them. Do not give generic advice when personalized context exists.
+
+Follow up with memory_get to read full sections when you need exact text.
 
 ### Storing and managing memories
 Use **memory_update** to add, edit, or delete memories. Do NOT use write_file or
@@ -195,6 +205,7 @@ export function buildSystemPrompt(
   channel?: string,
   groupContext?: GroupContext,
   memoryFiles?: string[],
+  memoryContext?: string | null,
 ): string {
   const toolDescriptions = buildToolDescriptions(model);
   const profile = getChannelProfile(channel);
@@ -219,8 +230,10 @@ ${toolDescriptions}
 ## Tool Usage Policy
 
 - Only use tools when the query actually requires external data
-- For stock prices, financials, metrics, estimates, insider trades, and company news headlines, use financial_search
-- Call financial_search ONCE with the full natural language query - it handles multi-company/multi-metric requests internally
+- For stock and crypto prices, company news, and insider trades, use get_market_data
+- For financials, metrics, and estimates, use get_financials
+- For screening stocks by financial criteria (e.g., P/E below 15, high growth), use stock_screener
+- Call get_financials or get_market_data ONCE with the full natural language query - they handle multi-company/multi-metric requests internally
 - Do NOT break up queries into multiple tool calls when one call can handle the request
 - When news headlines are returned, assess whether the titles and metadata already answer the user's question before fetching full articles with web_fetch (fetching is expensive). Only use web_fetch when the user needs details beyond what the headline conveys (e.g., quotes, specifics of a deal, earnings call takeaways)
 - For general web queries or non-financial topics, use web_search
@@ -230,7 +243,7 @@ ${toolDescriptions}
 
 ${buildSkillsSection()}
 
-${buildMemorySection(memoryFiles ?? [])}
+${buildMemorySection(memoryFiles ?? [], memoryContext)}
 
 ## Heartbeat
 

@@ -13,6 +13,7 @@ import { createRunContext, type RunContext } from './run-context.js';
 import { AgentToolExecutor } from './tool-executor.js';
 import { MemoryManager } from '../memory/index.js';
 import { runMemoryFlush, shouldRunMemoryFlush } from '../memory/flush.js';
+import { resolveProvider } from '../providers.js';
 
 
 const DEFAULT_MODEL = 'gpt-5.4';
@@ -56,10 +57,15 @@ export class Agent {
     const tools = getTools(model);
     const soulContent = await loadSoulDocument();
     let memoryFiles: string[] = [];
+    let memoryContext: string | null = null;
 
     if (config.memoryEnabled !== false) {
       const memoryManager = await MemoryManager.get();
       memoryFiles = await memoryManager.listFiles();
+      const session = await memoryManager.loadSessionContext();
+      if (session.text.trim()) {
+        memoryContext = session.text;
+      }
     }
 
     const systemPrompt = buildSystemPrompt(
@@ -68,6 +74,7 @@ export class Agent {
       config.channel,
       config.groupContext,
       memoryFiles,
+      memoryContext,
     );
     return new Agent(config, tools, systemPrompt);
   }
@@ -125,9 +132,10 @@ export class Agent {
           }
 
           const totalTime = Date.now() - ctx.startTime;
+          const provider = resolveProvider(this.model).displayName;
           yield {
             type: 'done',
-            answer: `Error: ${formatUserFacingError(errorMessage)}`,
+            answer: `Error: ${formatUserFacingError(errorMessage, provider)}`,
             toolCalls: ctx.scratchpad.getToolCallRecords(),
             iterations: ctx.iteration,
             totalTime,

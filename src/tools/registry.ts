@@ -1,5 +1,5 @@
 import { StructuredToolInterface } from '@langchain/core/tools';
-import { createFinancialSearch, createFinancialMetrics, createReadFilings } from './finance/index.js';
+import { createGetFinancials, createGetMarketData, createReadFilings, createScreenStocks } from './finance/index.js';
 import { exaSearch, perplexitySearch, tavilySearch, WEB_SEARCH_DESCRIPTION, xSearchTool, X_SEARCH_DESCRIPTION } from './search/index.js';
 import { skillTool, SKILL_TOOL_DESCRIPTION } from './skill.js';
 import { webFetchTool, WEB_FETCH_DESCRIPTION } from './fetch/web-fetch.js';
@@ -7,10 +7,12 @@ import { browserTool, BROWSER_DESCRIPTION } from './browser/browser.js';
 import { readFileTool, READ_FILE_DESCRIPTION } from './filesystem/read-file.js';
 import { writeFileTool, WRITE_FILE_DESCRIPTION } from './filesystem/write-file.js';
 import { editFileTool, EDIT_FILE_DESCRIPTION } from './filesystem/edit-file.js';
-import { FINANCIAL_SEARCH_DESCRIPTION } from './finance/financial-search.js';
-import { FINANCIAL_METRICS_DESCRIPTION } from './finance/financial-metrics.js';
+import { GET_FINANCIALS_DESCRIPTION } from './finance/get-financials.js';
+import { GET_MARKET_DATA_DESCRIPTION } from './finance/get-market-data.js';
 import { READ_FILINGS_DESCRIPTION } from './finance/read-filings.js';
+import { SCREEN_STOCKS_DESCRIPTION } from './finance/screen-stocks.js';
 import { heartbeatTool, HEARTBEAT_TOOL_DESCRIPTION } from './heartbeat/heartbeat-tool.js';
+import { cronTool, CRON_TOOL_DESCRIPTION } from './cron/cron-tool.js';
 import { memoryGetTool, MEMORY_GET_DESCRIPTION, memorySearchTool, MEMORY_SEARCH_DESCRIPTION, memoryUpdateTool, MEMORY_UPDATE_DESCRIPTION } from './memory/index.js';
 import { discoverSkills } from '../skills/index.js';
 import { createTushareSearch, TUSHARE_SEARCH_DESCRIPTION } from './finance/tushare/index.js';
@@ -68,6 +70,11 @@ export function getToolRegistry(model: string): RegisteredTool[] {
       description: HEARTBEAT_TOOL_DESCRIPTION,
     },
     {
+      name: 'cron',
+      tool: cronTool,
+      description: CRON_TOOL_DESCRIPTION,
+    },
+    {
       name: 'memory_search',
       tool: memorySearchTool,
       description: MEMORY_SEARCH_DESCRIPTION,
@@ -88,19 +95,24 @@ export function getToolRegistry(model: string): RegisteredTool[] {
   if (process.env.FINANCIAL_DATASETS_API_KEY) {
     tools.push(
       {
-        name: 'financial_search',
-        tool: createFinancialSearch(model),
-        description: FINANCIAL_SEARCH_DESCRIPTION,
+        name: 'get_financials',
+        tool: createGetFinancials(model),
+        description: GET_FINANCIALS_DESCRIPTION,
       },
       {
-        name: 'financial_metrics',
-        tool: createFinancialMetrics(model),
-        description: FINANCIAL_METRICS_DESCRIPTION,
+        name: 'get_market_data',
+        tool: createGetMarketData(model),
+        description: GET_MARKET_DATA_DESCRIPTION,
       },
       {
         name: 'read_filings',
         tool: createReadFilings(model),
         description: READ_FILINGS_DESCRIPTION,
+      },
+      {
+        name: 'stock_screener',
+        tool: createScreenStocks(model),
+        description: SCREEN_STOCKS_DESCRIPTION,
       },
     );
   }
