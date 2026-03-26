@@ -63,7 +63,7 @@ const ALL_TOOLS: StructuredToolInterface[] = [
 const TOOL_MAP = new Map<string, StructuredToolInterface>(ALL_TOOLS.map((t) => [t.name, t]));
 
 // ============================================================================
-// Tool Summary Index (Task 13.0)
+// Tool Summary Index
 // Concise 1-2 sentence summaries for initial LLM selection (~1K tokens total)
 // Full descriptions are loaded only for selected tools during execution.
 // ============================================================================
@@ -155,13 +155,13 @@ const TOOL_SUMMARIES: ToolSummary[] = [
 const TOOL_SUMMARY_INDEX = TOOL_SUMMARIES.map((t) => `${t.name}: ${t.summary}`).join('\n');
 
 // ============================================================================
-// Metrics (shared singleton for query pattern tracking — Task 13.15)
+// Metrics (shared singleton for query pattern tracking)
 // ============================================================================
 
 const routerMetrics = new MetricsTrackerImpl();
 
 // ============================================================================
-// Router Prompt Builder (Task 13.1)
+// Router Prompt Builder
 // ============================================================================
 
 function buildSelectionPrompt(): string {
@@ -176,7 +176,7 @@ ${TOOL_SUMMARY_INDEX}
 
 ## Guidelines
 
-### Stock Code Resolution (Task 13.2)
+### Stock Code Resolution
 - If the query mentions a company by name (Chinese or English) and you don't know its ts_code,
   call get_cn_stock_list FIRST to resolve the code, then call the data tool.
 - Well-known codes you can use directly:
@@ -226,7 +226,7 @@ Call the appropriate tool(s) now.`;
 const MAX_RESULT_CHARS = 20_000;
 
 /**
- * Limit a single tool result to MAX_RESULT_CHARS (Task 13.8).
+ * Limit a single tool result to MAX_RESULT_CHARS.
  * Adds truncation metadata when the result is cut.
  */
 function limitResultSize(data: unknown): unknown {
@@ -256,7 +256,7 @@ function limitResultSize(data: unknown): unknown {
 }
 
 /**
- * Deduplicate results by ts_code + date fields (Task 13.10).
+ * Deduplicate results by ts_code + date fields.
  * Keeps the last-seen entry (most recently processed = most complete).
  */
 function deduplicateResults(items: Record<string, unknown>[]): Record<string, unknown>[] {
@@ -304,7 +304,7 @@ function mergeResults(
 }
 
 // ============================================================================
-// Tool Execution (Tasks 13.4, 13.6)
+// Tool Execution Helpers
 // ============================================================================
 
 interface ToolExecutionResult {
@@ -355,7 +355,7 @@ async function executeTool(tc: ToolCall): Promise<ToolExecutionResult> {
 
 /**
  * Execute all tool calls in parallel using Promise.allSettled for partial-failure
- * tolerance (Tasks 13.4, 13.6). Returns both successful and failed results.
+ * tolerance. Returns both successful and failed results.
  */
 async function executeToolsInParallel(toolCalls: ToolCall[]): Promise<{
   successful: ToolExecutionResult[];
@@ -445,14 +445,14 @@ export function createTushareSearch(model: string): DynamicStructuredTool {
 
       onProgress?.('Searching Chinese market data...');
 
-      // ── Phase 1: Tool selection via compact summary index (Task 13.1) ──────
+      // ── Phase 1: Tool selection via compact summary index ──
       const { response } = await callLlm(input.query, {
         model,
         systemPrompt: buildSelectionPrompt(),
         tools: ALL_TOOLS,
       });
 
-      // Handle text response (no tools selected — Task 13.13)
+      // Handle text response (no tools selected)
       if (typeof response === 'string') {
         routerMetrics.recordApiCall('router_no_match', Date.now() - startTime, false);
         return formatToolResult(
@@ -470,7 +470,7 @@ export function createTushareSearch(model: string): DynamicStructuredTool {
       const aiMessage = response as AIMessage;
       const toolCalls = (aiMessage.tool_calls ?? []) as ToolCall[];
 
-      // No tool calls selected (Task 13.13)
+      // No tool calls selected
       if (toolCalls.length === 0) {
         routerMetrics.recordApiCall('router_no_match', Date.now() - startTime, false);
         return formatToolResult(
@@ -485,14 +485,14 @@ export function createTushareSearch(model: string): DynamicStructuredTool {
         );
       }
 
-      // ── Phase 2: Progress update (Task 13.12) ────────────────────────────
+      // ── Phase 2: Progress update ────────────────────────────
       const uniqueToolNames = [...new Set(toolCalls.map((tc) => tc.name))];
       const displayNames = uniqueToolNames
         .map((n) => n.replace(/^get_cn_/, '').replace(/_/g, ' '))
         .join(', ');
       onProgress?.(`Fetching: ${displayNames}...`);
 
-      // Track query pattern (Task 13.15)
+      // Track query pattern
       routerMetrics.recordApiCall(`router_query`, Date.now() - startTime, false);
       for (const tc of toolCalls) {
         routerMetrics.recordApiCall(`router_selected:${tc.name}`, 0, false);
@@ -501,7 +501,7 @@ export function createTushareSearch(model: string): DynamicStructuredTool {
       // ── Phase 3: Parallel execution with partial-failure tolerance ────────
       const { successful, failed } = await executeToolsInParallel(toolCalls);
 
-      // Progress: report completion (Task 13.12)
+      // Progress: report completion
       if (successful.length > 0) {
         const completedNames = successful
           .map((r) => r.tool.replace(/^get_cn_/, '').replace(/_/g, ' '))
@@ -512,7 +512,7 @@ export function createTushareSearch(model: string): DynamicStructuredTool {
       // ── Phase 4: Merge, deduplicate, and build response ──────────────────
       const { combined, allUrls } = mergeResults(successful);
 
-      // Attach error details for failed tools (Task 13.6)
+      // Attach error details for failed tools
       if (failed.length > 0) {
         combined['_errors'] = failed.map((r) => ({
           tool: r.tool,

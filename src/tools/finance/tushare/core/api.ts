@@ -24,6 +24,7 @@ import { determineTTL } from './cache.js';
 import { validateApiResponseArray } from '../utils/response-validation.js';
 import { splitByYear, spansMultipleYears } from '../utils/date.js';
 import type { DateYYYYMMDD } from '../types/common.js';
+import { logger } from '../../../../utils/logger.js';
 
 // ============================================================================
 // Semaphore for Concurrency Control
@@ -100,7 +101,7 @@ export interface TushareApiClient {
   /**
    * Fetch a multi-year date range in parallel by splitting into per-year requests.
    * Falls back to a single call when the range fits within one calendar year.
-   * Results are merged and sorted by date descending (Requirement 8.8).
+   * Results are merged and sorted by date descending.
    */
   callMultiYear<T extends Record<string, unknown>>(
     request: TushareRequest,
@@ -140,6 +141,10 @@ export class TushareApiClientImpl implements TushareApiClient {
     errorHandler: ErrorHandler,
     metrics: MetricsTracker
   ) {
+    // Check if token is set before attempting API call
+    if (!token) {
+      logger.warn('[TUSHARE API] call without key: Set the TUSHARE_API_KEY environment variable with your API token from https://tushare.pro');
+    }
     this.token = token;
     this.cache = cache;
     this.errorHandler = errorHandler;
@@ -152,15 +157,6 @@ export class TushareApiClientImpl implements TushareApiClient {
   async call<T>(request: TushareRequest): Promise<TushareResponse<T>> {
     const options = { ...DEFAULT_OPTIONS, ...request.options };
     const startTime = Date.now();
-
-    // Check if token is set before attempting API call
-    if (!this.token) {
-      throw new TushareError(
-        'TUSHARE_API_KEY environment variable is not set',
-        'MISSING_TOKEN',
-        'Set the TUSHARE_API_KEY environment variable with your API token from https://tushare.pro'
-      );
-    }
 
     // 1. Check cache
     if (options.cacheable) {
@@ -276,7 +272,6 @@ export class TushareApiClientImpl implements TushareApiClient {
    * found in each row, descending (most recent first).
    *
    * Falls back to a single call when the range fits within one calendar year.
-   * Requirement 8.8.
    */
   async callMultiYear<T extends Record<string, unknown>>(
     request: TushareRequest,
@@ -435,7 +430,7 @@ export class TushareApiClientImpl implements TushareApiClient {
       return obj;
     });
 
-    // Validate schema and coerce numeric fields (Requirements 13.5, 13.6, 13.7)
+    // Validate schema and coerce numeric fields
     const validated = validateApiResponseArray(apiName, rows);
 
     return validated as T;

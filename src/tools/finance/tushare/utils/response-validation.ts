@@ -299,7 +299,7 @@ export const API_RESPONSE_SCHEMAS: Record<string, z.ZodTypeAny> = {
  * Validate and coerce a single API response row against its schema.
  *
  * On failure, throws a TushareError that includes the field name, expected
- * type, and received value (Requirement 13.8).
+ * type, and received value.
  */
 export function validateApiResponse(
   apiName: string,

@@ -2,16 +2,16 @@ import type { DateYYYYMMDD } from '../types/common';
 
 /**
  * Get current date in Beijing timezone (UTC+8)
- * 
+ *
  * CRITICAL: Tushare uses Beijing time, so all date comparisons must use Beijing timezone
  * to avoid cache misses due to timezone differences.
- * 
+ *
  * Example scenarios:
  * - Server time: 2024-01-15 23:00 UTC (still Jan 15 in UTC)
  * - Beijing time: 2024-01-16 07:00 CST (already Jan 16 in Beijing)
  * - Without this function: Would incorrectly treat Jan 16 data as "current day"
  * - With this function: Correctly treats Jan 16 data as "historical"
- * 
+ *
  * @returns Date object representing today at 00:00:00 in Beijing timezone
  */
 export function getTodayBeijing(): Date {
@@ -26,7 +26,7 @@ export function getTodayBeijing(): Date {
 /**
  * Parse YYYYMMDD date string to Date object
  * Returns date at midnight (00:00:00) for consistent comparisons
- * 
+ *
  * @param dateStr - Date string in YYYYMMDD format (e.g., "20240115")
  * @returns Date object at midnight
  * @throws Error if date string is invalid format
@@ -56,7 +56,7 @@ export function parseDate(dateStr: DateYYYYMMDD): Date {
 
 /**
  * Format Date object to YYYYMMDD string
- * 
+ *
  * @param date - Date object to format
  * @returns Date string in YYYYMMDD format
  */
@@ -70,7 +70,7 @@ export function formatDate(date: Date): DateYYYYMMDD {
 /**
  * Check if a date is before today (Beijing time)
  * Used to determine if data is historical and can be cached indefinitely
- * 
+ *
  * @param dateStr - Date string in YYYYMMDD format
  * @returns true if date is before today (Beijing time), false otherwise
  */
@@ -82,7 +82,7 @@ export function isHistoricalDate(dateStr: DateYYYYMMDD): boolean {
 
 /**
  * Get today's date in YYYYMMDD format (Beijing time)
- * 
+ *
  * @returns Today's date string in YYYYMMDD format
  */
 export function getTodayBeijingFormatted(): DateYYYYMMDD {
@@ -92,7 +92,7 @@ export function getTodayBeijingFormatted(): DateYYYYMMDD {
 /**
  * Split a date range into per-year sub-ranges.
  *
- * Used by the multi-year parallel fetching feature (Requirement 8.8).
+ * Used by the multi-year parallel fetching feature.
  * Each sub-range spans exactly one calendar year, clipped to the original
  * start/end boundaries.
  *

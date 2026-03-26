@@ -1,11 +1,10 @@
 /**
- * Performance verification tests (Tasks 19.3 and 19.4)
+ * Performance verification tests
  *
- * 19.3 – Cache performance: cached responses return within 10ms; hit-rate tracking accuracy.
- * 19.4 – Parallel execution: parallel tool execution is faster than sequential;
+ * Cache performance: cached responses return within 10ms; hit-rate tracking accuracy.
+ * Parallel execution: parallel tool execution is faster than sequential;
  *         semaphore limits concurrent requests to 5.
  *
- * Requirements: 5.1, 8.1, 8.4, 8.7
  */
 
 import { describe, test, expect, beforeEach, mock } from 'bun:test';
@@ -33,10 +32,10 @@ function mockSuccessResponse(fields: string[], items: Array<Array<string | numbe
 }
 
 // ---------------------------------------------------------------------------
-// Task 19.3 – Cache performance (Requirement 8.4)
+// Cache performance
 // ---------------------------------------------------------------------------
 
-describe('Cache performance (Task 19.3)', () => {
+describe('Cache performance', () => {
   let cache: CacheManager;
 
   beforeEach(() => {
@@ -52,7 +51,7 @@ describe('Cache performance (Task 19.3)', () => {
     const elapsed = performance.now() - start;
 
     expect(result).toEqual(value);
-    expect(elapsed).toBeLessThan(10); // Requirement 8.4: < 10ms
+    expect(elapsed).toBeLessThan(10);
   });
 
   test('large cached value (post-compression) returns within 10ms', () => {
@@ -126,15 +125,15 @@ describe('Cache performance (Task 19.3)', () => {
     const elapsed = performance.now() - start;
 
     expect(second.metadata?.cached).toBe(true);
-    expect(elapsed).toBeLessThan(10); // Requirement 8.4
+    expect(elapsed).toBeLessThan(10);
   });
 });
 
 // ---------------------------------------------------------------------------
-// Task 19.4 – Parallel execution performance (Requirements 5.1, 8.1, 8.7)
+// Parallel execution performance
 // ---------------------------------------------------------------------------
 
-describe('Parallel execution performance (Task 19.4)', () => {
+describe('Parallel execution performance', () => {
   test('parallel batch is faster than sequential execution', async () => {
     // Each fake API call takes ~30ms
     const CALL_DELAY_MS = 30;
@@ -173,7 +172,7 @@ describe('Parallel execution performance (Task 19.4)', () => {
     expect(parallelTime).toBeLessThan(seqTime * 0.8);
   });
 
-  test('semaphore limits concurrent requests to 5 (Requirement 8.7)', async () => {
+  test('semaphore limits concurrent requests to 5', async () => {
     let activeConcurrent = 0;
     let maxObservedConcurrent = 0;
 
@@ -199,7 +198,7 @@ describe('Parallel execution performance (Task 19.4)', () => {
 
     await client.callBatch(requests);
 
-    expect(maxObservedConcurrent).toBeLessThanOrEqual(5); // Requirement 8.7
+    expect(maxObservedConcurrent).toBeLessThanOrEqual(5);
   });
 
   test('global semaphore is a singleton shared across client instances', () => {

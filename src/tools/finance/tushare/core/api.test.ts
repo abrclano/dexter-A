@@ -2,13 +2,14 @@
  * Tests for Tushare API Client
  */
 
-import { describe, test, expect, beforeEach, mock } from 'bun:test';
+import { describe, test, expect, beforeEach, mock, jest } from 'bun:test';
 import { TushareApiClientImpl, GLOBAL_TUSHARE_SEMAPHORE } from './api.js';
 import { CacheManager } from './cache.js';
 import { ErrorHandler } from './error.js';
 import { MetricsTrackerImpl } from './metrics.js';
 import type { TushareRequest, TushareRawResponse } from '../types/api.js';
 import { CacheStrategy } from '../types/api.js';
+import { logger } from '../../../../utils/logger.js';
 
 describe('TushareApiClient', () => {
   let cache: CacheManager;
@@ -24,10 +25,10 @@ describe('TushareApiClient', () => {
   });
 
   describe('constructor', () => {
-    test('should throw error if token is missing', () => {
-      expect(() => {
-        new TushareApiClientImpl('', cache, errorHandler, metrics);
-      }).toThrow('TUSHARE_API_KEY');
+    test('should call logger.warn if token is missing', () => {
+      const warnSpy = jest.spyOn(logger, 'warn');
+      new TushareApiClientImpl('', cache, errorHandler, metrics);
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('[TUSHARE API] call without key'));
     });
 
     test('should create client with valid token', () => {

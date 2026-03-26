@@ -4,7 +4,6 @@ import { CacheStrategy } from './api.js';
 /**
  * Zod schema for ToolConfig validation
  * Ensures configuration structure is type-safe before writing actual configs
- * This prevents Task 9 configs from being incompatible with Task 10 factory
  */
 
 // Field definition schema
