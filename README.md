@@ -68,7 +68,7 @@ bun --version
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/virattt/dexter.git
+git clone https://github.com/abrclano/dexter-A.git
 cd dexter
 ```
 
@@ -165,7 +165,7 @@ For the full list of supported APIs and developer guide, see the [Tushare Module
 - JSON format for programmatic access
 - Text descriptions summarizing query results
 
-For detailed API documentation and usage examples, visit the [EastMoney MX Documentation](https://marketing.dfcfs.com/views/finskillshub/).
+For detailed API documentation and usage examples, see the [EastMoney MX Module README](src/tools/finance/eastmoney/README.md).
 
 ## 🚀 How to Run
 

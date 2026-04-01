@@ -66,7 +66,7 @@ bun --version
 
 1. 克隆仓库：
 ```bash
-git clone https://github.com/virattt/dexter.git
+git clone https://github.com/abrclano/dexter-A.git
 cd dexter
 ```
 
@@ -163,7 +163,7 @@ cp env.example .env
 - JSON 格式，支持程序化访问
 - 文本描述总结查询结果
 
-详细的 API 文档和使用示例，请访问 [东方财富妙想文档](https://marketing.dfcfs.com/views/finskillshub/)。
+详细的 API 文档和使用示例，请参阅 [东方财富妙想模块文档](src/tools/finance/eastmoney/README.zh.md)。
 
 ## 🚀 运行
 
