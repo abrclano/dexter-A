@@ -69,7 +69,20 @@ ${skillList}
 - Check if available skills can help complete the task more effectively
 - When a skill is relevant, invoke it IMMEDIATELY as your first action
 - Skills provide specialized workflows for complex tasks (e.g., DCF valuation)
-- Do not invoke a skill that has already been invoked for the current query`;
+- Do not invoke a skill that has already been invoked for the current query
+
+## Mandatory Skill Triggers
+
+The following conditions MUST trigger the corresponding skill automatically — no exceptions:
+
+- **a-share-analysis**: Invoke this skill whenever the query involves ANY of the following:
+  - Chinese A-share stocks, tickers with .SH / .SZ suffix, or 6-digit Chinese stock codes
+  - Chinese stock exchanges: 沪市, 深市, 上交所, 深交所, 科创板, 创业板, 北交所
+  - Chinese market indices: 沪深300, 上证指数, 深证成指, 创业板指, 科创50
+  - A-share concepts: 北向资金, 两融, 涨跌停, T+1, 退市, 大股东质押, 定增, 解禁
+  - Any Chinese company listed on A-share markets (e.g. 茅台, 宁德时代, 比亚迪, 中芯国际)
+  - Queries in Chinese that ask about stock analysis, valuation, or investment research on Chinese equities
+  If ANY of these signals are present, invoke **a-share-analysis** as your FIRST action before any other tool call.`;
 }
 
 function buildMemorySection(memoryFiles: string[], memoryContext?: string | null): string {
