@@ -1,5 +1,5 @@
 import { existsSync, readdirSync } from 'fs';
-import { join, dirname, resolve } from 'path';
+import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import type { SkillMetadata, Skill, SkillSource } from './types.js';
 import { extractSkillMetadata, loadSkillFromPath } from './loader.js';
@@ -21,61 +21,32 @@ const SKILL_DIRECTORIES: { path: string; source: SkillSource }[] = [
 let skillMetadataCache: Map<string, SkillMetadata> | null = null;
 
 /**
- * Recursively scans a directory to find SKILL.md files.
- * Supports nested folder structures (e.g., skills/em/skill-name/SKILL.md).
+ * Scan a directory for SKILL.md files and return their metadata.
+ * Looks for directories containing SKILL.md files.
  *
- * @param dirPath - The current directory path to scan.
- * @param source - The source type for discovered skills (e.g., 'builtin', 'project').
- * @param skills - Accumulator array for found skill metadata.
- * @param visitedRealPaths - Set of resolved paths already visited to prevent symlink loops.
- * @returns Array of collected skill metadata.
+ * @param dirPath - Directory to scan
+ * @param source - Source type for discovered skills
+ * @returns Array of skill metadata
  */
-function scanSkillDirectoryRecursive(
-  dirPath: string,
-  source: SkillSource,
-  skills: SkillMetadata[] = [],
-  visitedRealPaths: Set<string> = new Set()
-): SkillMetadata[] {
+function scanSkillDirectory(dirPath: string, source: SkillSource): SkillMetadata[] {
   if (!existsSync(dirPath)) {
-    return skills;
+    return [];
   }
 
-  // Prevent infinite loops caused by symbolic links by tracking resolved real paths
-  try {
-    const realPath = resolve(dirPath);
-    if (visitedRealPaths.has(realPath)) {
-      return skills;
-    }
-    visitedRealPaths.add(realPath);
-  } catch (e) {
-    // If path resolution fails (e.g., permissions), skip this directory
-    return skills;
-  }
-
+  const skills: SkillMetadata[] = [];
   const entries = readdirSync(dirPath, { withFileTypes: true });
 
   for (const entry of entries) {
     if (entry.isDirectory()) {
-      const subDirPath = join(dirPath, entry.name);
-      const skillFilePath = join(subDirPath, 'SKILL.md');
-
-      // 1. Check if the immediate subdirectory contains a SKILL.md file
+      const skillFilePath = join(dirPath, entry.name, 'SKILL.md');
       if (existsSync(skillFilePath)) {
         try {
           const metadata = extractSkillMetadata(skillFilePath, source);
           skills.push(metadata);
-
-          // Optimization: If a directory defines a skill, we assume it's a leaf node
-          // and do not search deeper inside it to avoid conflicts or redundant scans.
-          continue;
-        } catch (err) {
-          console.warn(`Failed to load skill at ${skillFilePath}:`, err);
+        } catch {
+          // Skip invalid skill files silently
         }
       }
-
-      // 2. If no SKILL.md was found in this subdirectory, recurse deeper
-      // This allows structures like: skills/em/stock-info/SKILL.md
-      scanSkillDirectoryRecursive(subDirPath, source, skills, visitedRealPaths);
     }
   }
 
@@ -83,10 +54,10 @@ function scanSkillDirectoryRecursive(
 }
 
 /**
- * Discover all available skills from all configured skill directories.
- * Supports nested directory structures. Later sources override earlier ones by name.
+ * Discover all available skills from all skill directories.
+ * Later sources (project > user > builtin) override earlier ones.
  *
- * @returns Array of deduplicated skill metadata.
+ * @returns Array of skill metadata, deduplicated by name
  */
 export function discoverSkills(): SkillMetadata[] {
   if (skillMetadataCache) {
@@ -96,11 +67,9 @@ export function discoverSkills(): SkillMetadata[] {
   skillMetadataCache = new Map();
 
   for (const { path, source } of SKILL_DIRECTORIES) {
-    // Use the recursive scanner instead of the flat scanner
-    const skills = scanSkillDirectoryRecursive(path, source);
-
+    const skills = scanSkillDirectory(path, source);
     for (const skill of skills) {
-      // Later sources (e.g., project) override earlier ones (e.g., builtin)
+      // Later sources override earlier ones (by name)
       skillMetadataCache.set(skill.name, skill);
     }
   }
@@ -109,13 +78,13 @@ export function discoverSkills(): SkillMetadata[] {
 }
 
 /**
- * Get a specific skill by name, loading its full instructions.
+ * Get a skill by name, loading full instructions.
  *
- * @param name - The unique name of the skill.
- * @returns The full skill definition or undefined if not found.
+ * @param name - Name of the skill to load
+ * @returns Full skill definition or undefined if not found
  */
 export function getSkill(name: string): Skill | undefined {
-  // Ensure the cache is populated
+  // Ensure cache is populated
   if (!skillMetadataCache) {
     discoverSkills();
   }
@@ -125,15 +94,15 @@ export function getSkill(name: string): Skill | undefined {
     return undefined;
   }
 
-  // Load the full skill content from disk
+  // Load full skill with instructions
   return loadSkillFromPath(metadata.path, metadata.source);
 }
 
 /**
  * Build the skill metadata section for the system prompt.
- * Includes only name and description to keep the prompt lightweight.
+ * Only includes name and description (lightweight).
  *
- * @returns Formatted string for system prompt injection.
+ * @returns Formatted string for system prompt injection
  */
 export function buildSkillMetadataSection(): string {
   const skills = discoverSkills();
@@ -148,8 +117,7 @@ export function buildSkillMetadataSection(): string {
 }
 
 /**
- * Clear the skill cache.
- * Useful for testing or when skills are dynamically added/removed at runtime.
+ * Clear the skill cache. Useful for testing or when skills are added/removed.
  */
 export function clearSkillCache(): void {
   skillMetadataCache = null;

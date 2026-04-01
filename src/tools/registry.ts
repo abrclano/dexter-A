@@ -16,7 +16,18 @@ import { cronTool, CRON_TOOL_DESCRIPTION } from './cron/cron-tool.js';
 import { memoryGetTool, MEMORY_GET_DESCRIPTION, memorySearchTool, MEMORY_SEARCH_DESCRIPTION, memoryUpdateTool, MEMORY_UPDATE_DESCRIPTION } from './memory/index.js';
 import { discoverSkills } from '../skills/index.js';
 import { createTushareSearch, TUSHARE_SEARCH_DESCRIPTION } from './finance/tushare/index.js';
-import { createEastmoneySearch, EASTMONEY_DATA_DESCRIPTION, EASTMONEY_SEARCH_DESCRIPTION, EASTMONEY_SELFSELECT_DESCRIPTION, EASTMONEY_STOCK_SIMULATOR_DESCRIPTION } from './finance/eastmoney/index.js';
+import {
+  createEastmoneyDataTool,
+  createEastmoneySearchTool,
+  createEastmoneySelectStockTool,
+  createEastmoneySelfSelectTool,
+  createEastmoneyStockSimulatorTool,
+  EASTMONEY_DATA_DESCRIPTION,
+  EASTMONEY_SEARCH_DESCRIPTION,
+  EASTMONEY_SELECT_STOCK_DESCRIPTION,
+  EASTMONEY_SELFSELECT_DESCRIPTION,
+  EASTMONEY_STOCK_SIMULATOR_DESCRIPTION,
+} from './finance/eastmoney/index.js';
 
 /**
  * A registered tool with its rich description for system prompt injection.
@@ -131,24 +142,29 @@ export function getToolRegistry(model: string): RegisteredTool[] {
     tools.push(
       {
         name: 'eastmoney_mx_data',
-        tool: createEastmoneySearch(model, 'mx-data'),
+        tool: createEastmoneyDataTool(model),
         description: EASTMONEY_DATA_DESCRIPTION,
       },
       {
         name: 'eastmoney_mx_search',
-        tool: createEastmoneySearch(model, 'mx-search'),
+        tool: createEastmoneySearchTool(model),
         description: EASTMONEY_SEARCH_DESCRIPTION,
       },
       {
+        name: 'eastmoney_mx_select_stock',
+        tool: createEastmoneySelectStockTool(model),
+        description: EASTMONEY_SELECT_STOCK_DESCRIPTION,
+      },
+      {
         name: 'eastmoney_mx_selfselect',
-        tool: createEastmoneySearch(model, 'mx-selfselect'),
+        tool: createEastmoneySelfSelectTool(model),
         description: EASTMONEY_SELFSELECT_DESCRIPTION,
       },
       {
         name: 'eastmoney_mx_stock_simulator',
-        tool: createEastmoneySearch(model, 'mx-stock-simulator'),
+        tool: createEastmoneyStockSimulatorTool(model),
         description: EASTMONEY_STOCK_SIMULATOR_DESCRIPTION,
-      }
+      },
     );
   }
 

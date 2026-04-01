@@ -1,224 +1,321 @@
 /**
- * Eastmoney financial data search tool
+ * Eastmoney LangChain tool definitions.
  *
- * Routes natural language queries to the Eastmoney API using Python script.
+ * Each Eastmoney skill is exposed as a separate DynamicStructuredTool with
+ * its own typed schema so the LLM can call them via proper function calling
+ * rather than relying on fragile natural-language dispatch.
  */
 
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import type { RunnableConfig } from '@langchain/core/runnables';
 import { z } from 'zod';
-import { spawn } from 'child_process';
-import { join } from 'path';
 import { formatToolResult } from '../../../types.js';
+import { queryEastmoneyFinancialData } from '../eastmoney-data.js';
+import { queryEastmoneyNews } from '../eastmoney-search.js';
+import { querySelectStock } from '../eastmoney-select-stock.js';
+import { manageSelfSelect } from '../eastmoney-selfselect.js';
+import {
+  queryPositions,
+  queryBalance,
+  queryOrders,
+  executeTrade,
+  cancelOrder,
+} from '../eastmoney-stock-simulator.js';
 
-const EastmoneySearchSchema = z.object({
-  query: z.string().describe('Natural language query for financial data (e.g., "东方财富最新价", "股票行情", "财务数据")'),
-});
+// ── Tool descriptions (injected into system prompt) ───────────────────────────
 
 export const EASTMONEY_DATA_DESCRIPTION = `
-Search Chinese financial data using Eastmoney's API. Supports stock prices, financial statements, and company information.
+Query structured financial data, market quotes, and fundamental metrics for Chinese A-shares using Eastmoney's authoritative database. Provides real-time, accurate data to avoid model misconceptions based on outdated knowledge.
 
-Based on Eastmoney's authoritative database and latest market data, this tool supports natural language queries for three types of data:
+**Market Data** – Real-time prices, capital flows, PE/PB valuations for stocks, sectors, indices, funds, bonds.
+**Fundamental Data** – Revenue, net profit, assets, liabilities, executive info, shareholder structure.
+**Relationship Data** – Corporate relationships between stocks, companies, shareholders, executives.
 
-1. **Market Data**
-   Real-time quotes, main capital flows, valuations for stocks, industries, sectors, indices, funds, and bonds.
+Use when: "东方财富最新价", "贵州茅台市盈率", "宁德时代营收", "BYD主要股东"
+Do NOT use for: news/events → EASTMONEY_SEARCH | trading → EASTMONEY_STOCK_SIMULATOR | watchlist → EASTMONEY_SELFSELECT
 
-2. **Financial Data**
-   Basic information, financial indicators, executive information, main business, shareholder structure, and financing for listed and unlisted companies.
-
-3. **Relationship & Operations Data**
-   Relationship data between stocks, unlisted companies, shareholders and executives, plus enterprise operations data.
-
-## When to Use
-
-- For Chinese A-share market data and financial statements
-- When you need authoritative, up-to-date financial data from Eastmoney
-- For queries about company fundamentals, valuations, and relationships
-
-## When NOT to Use
-
-- For non-Chinese markets (use other financial tools)
-- For real-time trading (this is for research/analysis)
-
-## Output
-
-- Excel file with multiple sheets (.xlsx)
-- Text description file
-- Raw JSON data from API
-
-## Environment
-
-- Requires MX_APIKEY environment variable.
+Requires: MX_APIKEY
 `;
 
 export const EASTMONEY_SEARCH_DESCRIPTION = `
-Search Chinese financial news and information using Eastmoney's API. Supports news, announcements, research reports, and policy information.
+Search financial news, announcements, research reports, and policy updates in Chinese markets using Eastmoney's intelligent news filtering.
 
-Based on Eastmoney's intelligent search capabilities with financial scenario source filtering, this tool retrieves timely information and specific event data including news, announcements, research reports, policies, trading rules, specific events, impact analysis, and non-common knowledge requiring external data retrieval.
+**News & Announcements** – Real-time market news, company disclosures, regulatory announcements.
+**Research & Analysis** – Analyst reports, industry deep-dives, investment ratings.
+**Policy & Macro** – Government policies, trading rules, macroeconomic commentary.
 
-## When to Use
+Use when: "BYD最新新闻", "A股今日大跌原因", "AI行业研报", "新能源政策解读"
+Do NOT use for: specific numbers → EASTMONEY_DATA | trading → EASTMONEY_STOCK_SIMULATOR
 
-- For Chinese financial news and announcements
-- When you need authoritative, timely financial information from Eastmoney
-- For research reports, policy updates, and market analysis
-- To avoid AI referencing non-authoritative or outdated financial information
+Requires: MX_APIKEY
+`;
 
-## When NOT to Use
+export const EASTMONEY_SELECT_STOCK_DESCRIPTION = `
+Intelligent stock selection based on natural language criteria. Filters A-shares, sectors, funds, and ETFs by financial or technical conditions.
 
-- For non-Chinese financial markets
-- For general web search (use web_search tool)
-- For real-time trading decisions
+Use when: "市盈率低于20的半导体股票", "今日涨幅超2%的股票", "股息率大于3%的蓝筹股"
+Do NOT use for: single stock data → EASTMONEY_DATA | trading → EASTMONEY_STOCK_SIMULATOR
 
-## Output
-
-- Extracted plain text results (.txt)
-- Raw JSON data from API
-
-## Environment
-- Requires MX_APIKEY environment variable.
+Requires: MX_APIKEY
 `;
 
 export const EASTMONEY_SELFSELECT_DESCRIPTION = `
-Manage self-selected stocks and portfolios using Eastmoney's API. Supports adding/removing stocks from watchlists and portfolio management.
+Manage personal stock watchlists from your Eastmoney account. Query, add, or remove stocks using structured actions.
 
-Based on Eastmoney passport account data and underlying market data, this tool supports natural language queries, adding, and deleting stocks from self-selected lists.
+Actions: query (list watchlist) | add (add a stock) | remove (remove a stock)
 
-## Features
+Use when: "查看我的自选股", "把贵州茅台加入自选", "删除宁德时代自选"
+Do NOT use for: trading → EASTMONEY_STOCK_SIMULATOR | price data → EASTMONEY_DATA
 
-- Query my self-selected stock list
-- Add specified stocks to my self-selected list
-- Remove specified stocks from my self-selected list
-
-## When to Use
-
-- For managing personal stock watchlists
-- When you need to track specific stocks of interest
-- For portfolio organization and monitoring
-
-## When NOT to Use
-
-- For trading operations (use stock simulator tool)
-- For general market data (use data tool)
-
-## Output
-
-- Self-selected stock list in CSV format
-- Raw JSON data from API
-
-## Environment
-- Requires MX_APIKEY environment variable.
+Requires: MX_APIKEY
 `;
 
 export const EASTMONEY_STOCK_SIMULATOR_DESCRIPTION = `
-Stock trading simulation using Eastmoney's API. Supports virtual trading, portfolio simulation, and investment strategy testing.
+Execute virtual stock trading and manage a simulated A-share portfolio. The ONLY tool for position, trade, and order operations.
 
-Provides a stock portfolio simulation management system supporting position queries, buy/sell operations, order cancellation, order queries, historical transaction queries, and capital queries. Implements real trading experience through secure API interfaces.
+**Trading** – Buy/sell with limit or market price orders.
+**Orders** – Query pending orders, cancel by ID or cancel all.
+**Account** – Check positions, available funds, total assets, trade history.
 
-## Features
+Use when: "买入100股贵州茅台", "查询我的持仓", "撤销委托123", "账户余额"
+Do NOT use for: price queries → EASTMONEY_DATA | news → EASTMONEY_SEARCH | watchlist → EASTMONEY_SELFSELECT
 
-- Position queries
-- Buy/sell operations
-- Order cancellation
-- Order queries
-- Historical transaction queries
-- Capital/funds queries
-
-## When to Use
-
-- For practicing stock trading skills
-- To test investment strategies virtually
-- For learning trading operations without real money
-- For portfolio simulation and analysis
-
-## When NOT to Use
-
-- For real money trading
-- For investment advice or decision making
-- For non-A-share markets (futures, forex, HK stocks, US stocks)
-
-## Environment
-- Requires MX_APIKEY environment variable.
+Requires: MX_APIKEY
+⚠️ All operations use virtual capital – no real funds involved.
 `;
 
-/**
- * Execute the Python script for Eastmoney data query
- */
-async function executeEastmoneyQuery(query: string, skill: string = 'mx-data'): Promise<{ success: boolean; data?: any; error?: string }> {
-  return new Promise((resolve) => {
-    const scriptPath = join(process.cwd(), 'src', 'skills', 'eastmoney', skill, `${skill.replace('-', '_')}.py`);
-    const pythonCommand = process.env.PYTHON_COMMAND || (process.platform === 'win32' ? 'python' : 'python3');
+// ── Tool factory ──────────────────────────────────────────────────────────────
 
-    const pythonProcess = spawn(pythonCommand, [scriptPath, query], {
-      env: { ...process.env, MX_APIKEY: process.env.MX_APIKEY },
-      cwd: process.cwd(),
-    });
+/** eastmoney_mx_data – structured financial data query */
+export function createEastmoneyDataTool(_model: string): DynamicStructuredTool {
+  return new DynamicStructuredTool({
+    name: 'eastmoney_mx_data',
+    description: 'Query structured financial data (prices, fundamentals, valuations) for Chinese stocks via Eastmoney.',
+    schema: z.object({
+      toolQuery: z.string().describe('Natural language query, e.g. "东方财富最新价", "贵州茅台市盈率"'),
+    }),
+    func: async (input, _runManager, config?: RunnableConfig) => {
+      const onProgress = config?.metadata?.onProgress as ((msg: string) => void) | undefined;
+      onProgress?.('Querying Eastmoney financial data...');
 
-    let stdout = '';
-    let stderr = '';
+      const result = await queryEastmoneyFinancialData(input.toolQuery);
 
-    pythonProcess.stdout.on('data', (data) => {
-      stdout += data.toString();
-    });
-
-    pythonProcess.stderr.on('data', (data) => {
-      stderr += data.toString();
-    });
-
-    pythonProcess.on('close', (code) => {
-      if (code === 0) {
-        try {
-          const result = JSON.parse(stdout);
-          resolve({ success: true, data: result });
-        } catch (e) {
-          resolve({ success: true, data: stdout });
-        }
-      } else {
-        resolve({ success: false, error: stderr || `Process exited with code ${code}` });
+      if (!result.success) {
+        return formatToolResult({ error: result.error, query: input.toolQuery }, []);
       }
-    });
 
-    pythonProcess.on('error', (error) => {
-      resolve({ success: false, error: error.message });
-    });
+      onProgress?.('Financial data retrieved');
+      return formatToolResult(
+        { query: input.toolQuery, summary: result.summary, data: result.data },
+        []
+      );
+    },
   });
 }
 
-export function createEastmoneySearch(model: string, skill: string = 'mx-data'): DynamicStructuredTool {
-  const skillName = skill.replace('-', '_');
-  const displayName = skill === 'mx-data' ? 'Data' : skill === 'mx-search' ? 'Search' : skill.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
-
+/** eastmoney_mx_search – financial news / research search */
+export function createEastmoneySearchTool(_model: string): DynamicStructuredTool {
   return new DynamicStructuredTool({
-    name: `eastmoney_${skillName}`,
-    description: `Search Chinese financial ${displayName.toLowerCase()} using Eastmoney's API.`,
-    schema: EastmoneySearchSchema,
+    name: 'eastmoney_mx_search',
+    description: 'Search financial news, announcements, and research reports via Eastmoney.',
+    schema: z.object({
+      query: z.string().describe('Search query, e.g. "立讯精密最新研报", "A股今日大跌原因"'),
+    }),
     func: async (input, _runManager, config?: RunnableConfig) => {
       const onProgress = config?.metadata?.onProgress as ((msg: string) => void) | undefined;
+      onProgress?.('Searching Eastmoney news...');
 
-      onProgress?.(`Querying Eastmoney ${displayName}...`);
-
-      const result = await executeEastmoneyQuery(input.query, skill);
+      const result = await queryEastmoneyNews(input.query);
 
       if (!result.success) {
-        return formatToolResult(
-          {
-            error: 'Failed to query Eastmoney API',
-            details: result.error,
-            query: input.query,
-          },
-          []
-        );
+        return formatToolResult({ error: result.error, query: input.query }, []);
       }
 
-      onProgress?.(`${displayName} data retrieved successfully`);
+      onProgress?.('News search completed');
+      return formatToolResult(
+        { query: input.query, summary: result.summary, data: result.data },
+        []
+      );
+    },
+  });
+}
 
+/** eastmoney_mx_select_stock – intelligent stock screening */
+export function createEastmoneySelectStockTool(_model: string): DynamicStructuredTool {
+  return new DynamicStructuredTool({
+    name: 'eastmoney_mx_select_stock',
+    description: 'Screen and filter Chinese stocks by natural language criteria via Eastmoney.',
+    schema: z.object({
+      keyword: z.string().describe('Stock selection criteria, e.g. "市盈率低于20的半导体股票"'),
+      pageNo: z.number().int().min(1).default(1).describe('Page number (default 1)'),
+      pageSize: z.number().int().min(1).max(100).default(20).describe('Results per page (default 20, max 100)'),
+    }),
+    func: async (input, _runManager, config?: RunnableConfig) => {
+      const onProgress = config?.metadata?.onProgress as ((msg: string) => void) | undefined;
+      onProgress?.('Screening stocks...');
+
+      const result = await querySelectStock(input.keyword, input.pageNo, input.pageSize);
+
+      if (!result.success) {
+        return formatToolResult({ error: result.error, keyword: input.keyword }, []);
+      }
+
+      onProgress?.(`Found ${result.total} matching stocks`);
+      return formatToolResult(
+        { keyword: input.keyword, total: result.total, summary: result.summary, rows: result.rows },
+        []
+      );
+    },
+  });
+}
+
+/** eastmoney_mx_selfselect – watchlist management */
+export function createEastmoneySelfSelectTool(_model: string): DynamicStructuredTool {
+  return new DynamicStructuredTool({
+    name: 'eastmoney_mx_selfselect',
+    description: 'Manage Eastmoney personal stock watchlist: query, add, or remove stocks.',
+    schema: z.object({
+      action: z
+        .enum(['query', 'add', 'remove'])
+        .describe('"query" to list watchlist, "add" to add a stock, "remove" to remove a stock'),
+      stockNameOrCode: z
+        .string()
+        .optional()
+        .describe('Stock name or code (required for add/remove), e.g. "贵州茅台" or "600519"'),
+    }),
+    func: async (input, _runManager, config?: RunnableConfig) => {
+      const onProgress = config?.metadata?.onProgress as ((msg: string) => void) | undefined;
+      onProgress?.(`Self-select: ${input.action}...`);
+
+      const result = await manageSelfSelect(input.action, input.stockNameOrCode);
+
+      if (!result.success) {
+        return formatToolResult({ error: result.error, action: input.action }, []);
+      }
+
+      onProgress?.('Self-select operation completed');
       return formatToolResult(
         {
-          query: input.query,
-          result: result.data,
-          note: `Data saved to .dexter/mx_data/output/ directory`,
+          action: input.action,
+          message: result.message,
+          summary: result.summary,
+          stocks: result.stocks,
         },
         []
       );
     },
   });
 }
+
+/** eastmoney_mx_stock_simulator – simulated trading */
+export function createEastmoneyStockSimulatorTool(_model: string): DynamicStructuredTool {
+  return new DynamicStructuredTool({
+    name: 'eastmoney_mx_stock_simulator',
+    description:
+      'Simulated A-share trading: buy/sell stocks, query positions, check balance, manage orders.',
+    schema: z.object({
+      action: z
+        .enum(['positions', 'balance', 'orders', 'trade', 'cancel'])
+        .describe(
+          '"positions" = query holdings | "balance" = query funds | "orders" = query order history | "trade" = buy/sell | "cancel" = cancel order(s)'
+        ),
+      // --- trade fields ---
+      tradeType: z
+        .enum(['buy', 'sell'])
+        .optional()
+        .describe('[trade] "buy" or "sell"'),
+      stockCode: z
+        .string()
+        .optional()
+        .describe('[trade/cancel] 6-digit A-share code, e.g. "600519"'),
+      price: z
+        .number()
+        .optional()
+        .describe('[trade] Limit price in yuan; omit when useMarketPrice=true'),
+      quantity: z
+        .number()
+        .int()
+        .optional()
+        .describe('[trade] Number of shares, must be a multiple of 100'),
+      useMarketPrice: z
+        .boolean()
+        .optional()
+        .describe('[trade] Use latest market price instead of limit price (default false)'),
+      // --- cancel fields ---
+      cancelType: z
+        .enum(['order', 'all'])
+        .optional()
+        .describe('[cancel] "order" = cancel specific order, "all" = cancel all pending'),
+      orderId: z
+        .string()
+        .optional()
+        .describe('[cancel] Order ID, required when cancelType="order"'),
+      // --- orders filter fields ---
+      fltOrderDrt: z
+        .number()
+        .int()
+        .optional()
+        .describe('[orders] Direction filter: 0=all (default), 1=buy, 2=sell'),
+      fltOrderStatus: z
+        .number()
+        .int()
+        .optional()
+        .describe('[orders] Status filter: 0=all (default), 2=submitted, 4=filled'),
+    }),
+    func: async (input, _runManager, config?: RunnableConfig) => {
+      const onProgress = config?.metadata?.onProgress as ((msg: string) => void) | undefined;
+      onProgress?.(`Stock simulator: ${input.action}...`);
+
+      let result: { success: boolean; data?: unknown; summary?: string; message?: string; error?: string } =
+        { success: false, error: 'Unknown action' };
+
+      switch (input.action) {
+        case 'positions':
+          result = await queryPositions();
+          break;
+        case 'balance':
+          result = await queryBalance();
+          break;
+        case 'orders':
+          result = await queryOrders({
+            fltOrderDrt: input.fltOrderDrt,
+            fltOrderStatus: input.fltOrderStatus,
+          });
+          break;
+        case 'trade':
+          result = await executeTrade({
+            type: input.tradeType!,
+            stockCode: input.stockCode!,
+            price: input.price,
+            quantity: input.quantity!,
+            useMarketPrice: input.useMarketPrice,
+          });
+          break;
+        case 'cancel':
+          result = await cancelOrder({
+            type: input.cancelType ?? 'all',
+            orderId: input.orderId,
+            stockCode: input.stockCode,
+          });
+          break;
+      }
+
+      if (!result.success) {
+        return formatToolResult({ error: result.error, action: input.action }, []);
+      }
+
+      onProgress?.(`${input.action} completed`);
+      return formatToolResult(
+        {
+          action: input.action,
+          message: result.message,
+          summary: result.summary,
+          data: result.data,
+        },
+        []
+      );
+    },
+  });
+}
+
+
