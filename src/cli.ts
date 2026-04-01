@@ -6,6 +6,7 @@ import type {
   ToolStartEvent,
 } from './agent/index.js';
 import { getApiKeyNameForProvider, getProviderDisplayName } from './utils/env.js';
+import { defaultQueue } from './utils/message-queue.js';
 import { logger } from './utils/logger.js';
 import {
   AgentRunnerController,
@@ -124,6 +125,8 @@ function renderHistory(chatLog: ChatLogComponent, history: AgentRunnerController
         } else if (display.completed && display.endEvent?.type === 'tool_error') {
           const toolError = display.endEvent as ToolErrorEvent;
           component.setError(toolError.error);
+        } else if (item.status === 'interrupted') {
+          // Don't start spinner for tools in interrupted items
         } else if (display.progressMessage) {
           component.setActive(display.progressMessage);
         }
@@ -150,6 +153,18 @@ function renderHistory(chatLog: ChatLogComponent, history: AgentRunnerController
       if (event.type === 'context_cleared') {
         chatLog.addContextCleared(event.clearedCount, event.keptCount);
       }
+
+      if (event.type === 'microcompact') {
+        chatLog.addMicrocompact(event.cleared, event.tokensSaved);
+      }
+
+      if (event.type === 'queue_drain') {
+        chatLog.addQueueDrain(event.messageCount);
+      }
+
+      if (event.type === 'compaction' && event.phase === 'end') {
+        chatLog.addCompaction(event.success ?? false, event.preCompactTokens, event.postCompactTokens);
+      }
     }
 
     if (item.answer) {
@@ -174,13 +189,18 @@ export async function runCli() {
     tui.requestRender();
   };
 
+  let agentRunner: AgentRunnerController;
   const modelSelection = new ModelSelectionController(onError, () => {
     intro.setModel(modelSelection.model);
+    agentRunner?.updateAgentConfig({
+      model: modelSelection.model,
+      modelProvider: modelSelection.provider,
+    });
     renderSelectionOverlay();
     tui.requestRender();
   });
 
-  const agentRunner = new AgentRunnerController(
+  agentRunner = new AgentRunnerController(
     { model: modelSelection.model, modelProvider: modelSelection.provider, maxIterations: 10 },
     modelSelection.inMemoryChatHistory,
     () => {
@@ -216,7 +236,21 @@ export async function runCli() {
       return;
     }
 
-    if (modelSelection.isInSelectionFlow() || agentRunner.pendingApproval || agentRunner.isProcessing) {
+    if (modelSelection.isInSelectionFlow() || agentRunner.pendingApproval) {
+      return;
+    }
+
+    // If agent is busy, enqueue the message for mid-run injection
+    if (agentRunner.isProcessing) {
+      defaultQueue.enqueue({
+        text: query,
+        priority: 'next',
+        enqueuedAt: Date.now(),
+        source: 'cli',
+      });
+      await inputHistory.saveMessage(query);
+      chatLog.addQueuedMessage(query);
+      tui.requestRender();
       return;
     }
 

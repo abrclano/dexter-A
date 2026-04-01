@@ -1,5 +1,6 @@
 import { Agent } from '../agent/agent.js';
 import type { InMemoryChatHistory } from '../utils/in-memory-chat-history.js';
+import { defaultQueue } from '../utils/message-queue.js';
 import type {
   AgentConfig,
   AgentEvent,
@@ -20,7 +21,7 @@ export class AgentRunnerController {
   private workingStateValue: WorkingState = { status: 'idle' };
   private errorValue: string | null = null;
   private pendingApprovalValue: { tool: string; args: Record<string, unknown> } | null = null;
-  private readonly agentConfig: AgentConfig;
+  private agentConfig: AgentConfig;
   private readonly inMemoryChatHistory: InMemoryChatHistory;
   private readonly onChange?: ChangeListener;
   private abortController: AbortController | null = null;
@@ -62,6 +63,17 @@ export class AgentRunnerController {
   setError(error: string | null) {
     this.errorValue = error;
     this.emitChange();
+  }
+
+  get currentConfig(): Readonly<AgentConfig> {
+    return this.agentConfig;
+  }
+
+  updateAgentConfig(config: Partial<Pick<AgentConfig, 'model' | 'modelProvider' | 'maxIterations'>>) {
+    this.agentConfig = {
+      ...this.agentConfig,
+      ...config,
+    };
   }
 
   respondToApproval(decision: ApprovalDecision) {
@@ -117,6 +129,7 @@ export class AgentRunnerController {
         signal: this.abortController.signal,
         requestToolApproval: this.requestToolApproval,
         sessionApprovedTools: this.sessionApprovedTools,
+        messageQueue: defaultQueue,
       });
       const stream = agent.run(query, this.inMemoryChatHistory);
       for await (const event of stream) {
@@ -125,6 +138,14 @@ export class AgentRunnerController {
         }
         await this.handleEvent(event);
       }
+
+      // Post-run: if messages arrived after the agent's last drain, start a new turn
+      if (!defaultQueue.isEmpty()) {
+        const remaining = defaultQueue.dequeueAll();
+        const mergedText = remaining.map(m => m.text).join('\n\n');
+        return this.runQuery(mergedText);
+      }
+
       if (finalAnswer) {
         return { answer: finalAnswer };
       }
@@ -215,6 +236,9 @@ export class AgentRunnerController {
         break;
       case 'tool_limit':
       case 'context_cleared':
+      case 'compaction':
+      case 'microcompact':
+      case 'queue_drain':
         this.pushEvent({
           id: `${event.type}-${Date.now()}`,
           event,
