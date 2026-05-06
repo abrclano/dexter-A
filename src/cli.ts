@@ -197,6 +197,7 @@ export async function runCli() {
   let lastRenderedEventCount = 0;
   let lastRenderedStatus = '';
   let lastRenderedAnswer = false;
+  let lastRenderedQueryId: string | null = null;
   const finalizedToolIds = new Set<string>();
 
   agentRunner = new AgentRunnerController(
@@ -207,10 +208,11 @@ export async function runCli() {
       const history = agentRunner.history;
       const lastItem = history[history.length - 1];
       if (lastItem) {
-        // New query started
-        if (lastItem.events.length === 0 && lastRenderedEventCount === 0 && !lastRenderedAnswer) {
+        // New query started — keyed by id so onChange storms don't re-render the header
+        if (lastItem.id !== lastRenderedQueryId) {
           chatLog.addQuery(lastItem.query);
           chatLog.resetToolGrouping();
+          lastRenderedQueryId = lastItem.id;
         }
 
         // Render new events only
@@ -268,6 +270,7 @@ export async function runCli() {
   const intro = new IntroComponent(modelSelection.model);
   const errorText = new Text('', 0, 0);
   const workingIndicator = new WorkingIndicatorComponent(tui);
+  workingIndicator.setTurnStatsProvider(() => agentRunner.turnStats);
   const editor = new CustomEditor(tui, editorTheme);
   const hintBar = new HintBarComponent();
   const debugPanel = new DebugPanelComponent(8, true);
